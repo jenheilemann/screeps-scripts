@@ -1,4 +1,4 @@
-# Setting up the project
+# Setting up & deploying the project
 
 * run `npm install`
 * Create a .private.json file in the following format:
@@ -11,6 +11,8 @@
     "ptr": false
 }
 ```
+
+## Deploying
 
 * run `grunt screeps` to deploy the code in `./src` to the "default" branch on the main screeps server.
 * run `grunt screeps --branch=dev` to deploy to the dev branch.
