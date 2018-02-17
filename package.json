@@ -1,0 +1,12 @@
+{
+  "name": "kippogis-screeps",
+  "version": "0.1.0",
+  "description": "Kippogis' Screeps Bot",
+  "main": "index.js",
+  "author": "Jen Heilemann",
+  "license": "MIT",
+  "devDependencies": {
+    "grunt": "^1.0.2",
+    "grunt-screeps": "^1.4.0"
+  }
+}
