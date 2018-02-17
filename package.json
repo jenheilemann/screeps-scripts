@@ -9,6 +9,8 @@
     "grunt": "^1.0.2",
     "grunt-contrib-clean": "^1.1.0",
     "grunt-contrib-copy": "^1.0.0",
+    "grunt-file-append": "0.0.7",
+    "grunt-rsync": "^2.0.1",
     "grunt-screeps": "^1.4.0"
   }
 }

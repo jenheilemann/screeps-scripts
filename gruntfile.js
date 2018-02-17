@@ -5,11 +5,19 @@ module.exports = function(grunt) {
     var email = grunt.option('email') || config.email
     var password = grunt.option('password') || config.password
     var ptr = grunt.option('ptr') ? true : config.ptr
+    var private_directory = grunt.option('private_directory') || config.private_directory;
 
     grunt.loadNpmTasks('grunt-screeps')
     grunt.loadNpmTasks('grunt-contrib-clean')
     grunt.loadNpmTasks('grunt-contrib-copy')
+    grunt.loadNpmTasks('grunt-file-append')
+    grunt.loadNpmTasks('grunt-rsync')
 
+    var currentdate = new Date();
+
+    // Output the current date and branch.
+    grunt.log.subhead('Task Start: ' + currentdate.toLocaleString())
+    grunt.log.writeln('Branch: ' + branch)
 
     grunt.initConfig({
         // Set up screeps deployment options
@@ -49,7 +57,37 @@ module.exports = function(grunt) {
             }],
           }
         },
+
+        // Add version variable using current timestamp.
+        file_append: {
+          versioning: {
+            files: [
+              {
+                append: "\nglobal.SCRIPT_VERSION = "+ currentdate.getTime() + "\n",
+                input: 'dist/version.js',
+              }
+            ]
+          }
+        },
+
+        // Copy files to the folder the client uses to sink to the private server.
+        // Use rsync so the client only uploads the changed files.
+        rsync: {
+            options: {
+                args: ["--verbose", "--checksum"],
+                exclude: [".git*"],
+                recursive: true
+            },
+            private: {
+                options: {
+                    src: './dist/',
+                    dest: private_directory + branch,
+                }
+            },
+        },
+
     });
 
-    grunt.registerTask('default',  ['clean', 'copy:screeps', 'screeps']);
+    grunt.registerTask('deploy',  ['clean', 'copy:screeps', 'file_append:versioning', 'screeps']);
+    grunt.registerTask('private',  ['clean', 'copy:screeps', 'file_append:versioning', 'rsync:private']);
 }

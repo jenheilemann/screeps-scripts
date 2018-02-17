@@ -8,7 +8,9 @@
     "email": "<email>",
     "password": "<password>",
     "branch": "default",
-    "ptr": false
+    "ptr": false,
+    "private_directory": "/cygdrive/c/path/to/local/screeps/server/"
+    # don't miss the final backslash
 }
 ```
 
