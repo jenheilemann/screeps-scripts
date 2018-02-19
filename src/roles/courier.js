@@ -15,6 +15,7 @@ class Courier extends GenericCreep {
 
     switch(true) {
       case extensions == 0:
+      case roomManager.creepsByRole()['courier'].length === 0:
         return [CARRY, CARRY, MOVE, CARRY, CARRY, MOVE]
         break;
       case extensions <= 5:

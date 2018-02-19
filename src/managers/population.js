@@ -108,7 +108,6 @@ const POPULATION_DISTRIBUTION = {
         avg = _.sum(_.map(cont, ( c) => c.store.energy))/cont.length
         multiplier = avg > 1500 ? 0.75 : 0.5
       }
-      console.log(cont.length, avg, multiplier, Math.ceil(rm.controllerLevel()*multiplier) + 1)
       return Math.ceil(rm.controllerLevel()*multiplier) + 1
     },
     max: 6,

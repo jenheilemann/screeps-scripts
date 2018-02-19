@@ -36,8 +36,19 @@ class Generic {
     }
   }
 
+  // usually just the same role, but can be overriden in subclasses.
+  // this allows things like the worker group of creeps to share a pot of
+  // containers.
+  static comparisonRoles() {
+    return [this.role()]
+  }
+
+  static similarCreeps(rm) {
+    return _.filter(rm.creeps(), (c) => this.comparisonRoles().includes(c.memory.role))
+  }
+
   static _findSourceWithOpenSpot(roomManager) {
-    var creeps = roomManager.creepsByRole()[this.role()]
+    var creeps = this.similarCreeps(roomManager)
     var sources = _.map(roomManager.sources(), 'id')
     var count = {}
     for (var i in sources) {
