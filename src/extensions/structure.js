@@ -1,7 +1,7 @@
 'use strict'
 
-Structure.prototype.repairNeeded = function () {
-  return this.hits/this.hitsMax < 0.8
+Structure.prototype.repairNeeded = function (percent) {
+  return this.hits/this.hitsMax < percent
 }
 
 Structure.prototype.isBarrier = function () {

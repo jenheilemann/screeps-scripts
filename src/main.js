@@ -27,6 +27,7 @@ require(`extensions_construction_site`)
 require(`extensions_source`)
 
 global.GenericCreep = require(`roles_generic`)
+global.WorkerCreep = require(`roles_worker`)
 
 global.util = require('lib_util')
 const RoomManager = require('managers_room')

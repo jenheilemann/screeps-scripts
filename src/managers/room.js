@@ -152,15 +152,15 @@ class RoomManager {
     return this._containers
   }
 
-  repairNeededStructures() {
+  repairNeededStructures(percent = 0.8) {
     if (!this._repairNeeded) {
       this._repairNeeded = _.filter(this.structures(),
-        (s) => !s.isBarrier() && s.repairNeeded())
+        (s) => !s.isBarrier() && s.repairNeeded(percent))
     }
     return this._repairNeeded
   }
 
-  repairNeededBarriers() {
+  repairNeededBarriers(percent = 0.8) {
     var barriers
     if (!this._repairBarriers) {
       barriers = _.filter(this.structures(), (s) => s.isBarrier())
@@ -170,7 +170,7 @@ class RoomManager {
 
       var avg =  _.sum(barriers, 'hits') / barriers.length
       this._repairBarriers = _.filter(this.structures(),
-        (s) => s.repairNeeded() && (s.hits < avg + 5000 || s.hits > 200000) )
+        (s) => s.repairNeeded(percent) && (s.hits < avg + 5000 || s.hits < 200000) )
     }
     return this._repairBarriers
   }

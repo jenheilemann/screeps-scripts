@@ -140,7 +140,7 @@ class Generic {
   repair() {
     var structures, repairable
     if (!this.memory.repairable || Game.time - this.memory.repairStarted > 120 ) {
-      structures = this.roomManager.repairNeededStructures().concat(
+      structures = this.roomManager.repairNeededStructures(0.95).concat(
                    this.roomManager.repairNeededBarriers())
 
       // No repairable structures found
