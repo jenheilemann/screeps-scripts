@@ -101,14 +101,22 @@ const POPULATION_DISTRIBUTION = {
         return 1
       }
 
-      return Math.ceil(rm.controllerLevel()/2) + 1
+      var cont = rm.containers()
+      var avg = 0
+      var multiplier = 0.5
+      if (cont.length > 1) {
+        avg = _.sum(_.map(cont, ( c) => c.store.energy))/cont.length
+        multiplier = avg > 1500 ? 0.75 : 0.5
+      }
+      console.log(cont.length, avg, multiplier, Math.ceil(rm.controllerLevel()*multiplier) + 1)
+      return Math.ceil(rm.controllerLevel()*multiplier) + 1
     },
-    max: 4,
+    max: 6,
     minExtensions: 0
   },
   defender:  {
     goal: function(rm) {
-      return rm.defconLevel() + 1
+      return rm.defconLevel()
     },
     max: 6,
     minExtensions: 3
