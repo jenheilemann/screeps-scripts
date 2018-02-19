@@ -47,16 +47,22 @@ class Generic {
     return Object.keys(count).sort(function(a,b){return count[a] - count[b]})[0]
   }
 
-  harvest() {
-    if (this.container && !this.creep.pos.isEqualTo(this.container)) {
-      return this.creep.moveTo(this.container, STYLE['harvest'])
+  harvest(harvestToContainer = false) {
+    var container = this.container
+    var pos = this.creep.pos
+
+    if (harvestToContainer && container && !pos.isEqualTo(container)) {
+      return this.creep.moveTo(container, STYLE['harvest'])
     }
 
-    if(!this.creep.pos.isNearTo(this.source)) {
+    if(!pos.isNearTo(this.source)) {
       return this.creep.moveTo(this.source, STYLE['harvest']);
     }
 
     this.creep.harvest(this.source)
+    if (harvestToContainer && container && !container.isFull() && pos.isEqualTo(container) ) {
+      this.creep.drop(RESOURCE_ENERGY)
+    }
   }
 
   placeRoadConstructions() {
@@ -81,11 +87,12 @@ class Generic {
 
   collect() {
     var container = this.container
+    var trunkSpace = this.creep.carryCapacity - _.sum(this.creep.carry)
 
-    if (!container || container.store[RESOURCE_ENERGY] < this.carryCapacity*0.75) {
+    if (!container || container.store[RESOURCE_ENERGY] < trunkSpace) {
       container = _.filter(this.roomManager.structures(),
         (i) => i.structureType == STRUCTURE_CONTAINER &&
-                   i.store[RESOURCE_ENERGY] > this.carryCapacity*0.75
+                   i.store[RESOURCE_ENERGY] >= trunkSpace
         )[0];
     }
 
@@ -172,7 +179,7 @@ class Generic {
     var parkingSpot
     if (!this.memory.parking) {
       parkingSpot = this.findParkingSpot()
-      if (parkingSpot) {
+      if (typeof(parkingSpot) == 'object' ) {
         this.creep.moveTo(parkingSpot)
         this.memory.parking = true
       } else {
@@ -180,7 +187,7 @@ class Generic {
         this.creep.move(_.shuffle([LEFT, TOP_LEFT, TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT])[0])
       }
     }
-    this.creep.say(`🚬🚬🚬`)
+    this.creep.say(`🚬`)
   }
 
   findParkingSpot() {

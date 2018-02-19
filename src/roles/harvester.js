@@ -52,7 +52,9 @@ class Harvester extends GenericCreep {
     }
 
     if(this.creep.memory.harvesting) {
-      return this.harvest()
+      var creeps = this.roomManager.creepsByRole()
+      var overContainer = creeps['courier'].length > 0
+      return this.harvest(overContainer)
     }
 
     if (this.courier() === false) {
