@@ -4,6 +4,8 @@ if (Game.cpu.bucket < 500) {
   return
 }
 
+global.STRUCTURE_BARRIER = [STRUCTURE_WALL, STRUCTURE_RAMPART]
+
 require('version')
 if(!Memory.SCRIPT_VERSION || Memory.SCRIPT_VERSION != SCRIPT_VERSION) {
   Memory.SCRIPT_VERSION = SCRIPT_VERSION
@@ -13,13 +15,15 @@ if(!Memory.SCRIPT_VERSION || Memory.SCRIPT_VERSION != SCRIPT_VERSION) {
 /* Add "creep talk" library - https://github.com/screepers/creeptalk */
 const language = require('thirdparty_creeptalk_emoji')
 require('thirdparty_creeptalk')({
-  'public': true,
+  'public': false,
   'language': language
 })
 
 // Various extensions to the base game objects
 require(`extensions_structure`)
+require(`extensions_structure_container`)
 global.StructureNull = require(`extensions_structure_null`)
+require(`extensions_construction_site`)
 require(`extensions_source`)
 
 global.GenericCreep = require(`roles_generic`)

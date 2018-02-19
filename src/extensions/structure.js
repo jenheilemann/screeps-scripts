@@ -5,5 +5,9 @@ Structure.prototype.repairNeeded = function () {
 }
 
 Structure.prototype.isBarrier = function () {
-  return this.structureType == STRUCTURE_WALL || this.structureType == STRUCTURE_RAMPART
+  return STRUCTURE_BARRIER.includes(this.structureType)
+}
+
+Structure.prototype.isNull = function() {
+  return false
 }

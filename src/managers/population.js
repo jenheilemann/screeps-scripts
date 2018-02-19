@@ -71,23 +71,25 @@ const POPULATION_DISTRIBUTION = {
   },
   builder:   {
     goal: function(rm){
-      var sites, roads, walls, weightedCount
+      var sites, progress, total, remaining
       sites = rm.constructionSites()
-      roads = _.filter(sites, (s) => s.structureType == STRUCTURE_ROAD).length
-      walls = _.filter(sites, (s) => s.structureType == STRUCTURE_WALL).length
-      weightedCount = (sites.length - roads - walls) + (roads + walls)*0.3
 
-      return Math.ceil(weightedCount/7)
+      progress = _.sum(_.map(sites, 'progress'))
+      total = _.sum(_.map(sites, 'progressTotal'))
+      remaining = total - progress
+
+      return Math.ceil(remaining/6000)
     },
     max: 7,
     minExtensions: 0
   },
   courier:   {
     goal: function(rm){
-      return Math.floor(rm.energyHogs().length/7) + rm.sources().length
+      var containers = _.filter(_.map(rm.sources(), (s) => s.container()), (c) => !c.isNull() )
+      return Math.floor(rm.energyHogs().length/7) + containers.length
     },
     max: 10,
-    minExtensions: 3
+    minExtensions: 0
   },
   upgrader:  {
     goal: function(rm) {
