@@ -1,4 +1,4 @@
-if(Game.time % 5 == 3) { console.log(`CPU bucket: ${Game.cpu.bucket}`) }
+if(Game.time % 13 == 3) { console.log(`CPU bucket: ${Game.cpu.bucket}`) }
 if (Game.cpu.bucket < 500) {
   throw new Error(`Extremely low bucket (${Game.cpu.bucket}) - aborting script run at top level`)
   return
@@ -32,7 +32,7 @@ global.util = require('lib_util')
 const RoomManager = require('managers_room')
 
 module.exports.loop = function () {
-  if(Game.time % 5 == 3) { console.log(`CPU bucket: ${Game.cpu.bucket}`) }
+  if(Game.time % 13 == 3) { console.log(`CPU bucket: ${Game.cpu.bucket}`) }
   if (Game.cpu.bucket < 500) {
     if (Game.cpu.limit !== 0) {
       throw new Error(`Extremely low bucket (${Game.cpu.bucket}) - aborting script run at start of loop`)

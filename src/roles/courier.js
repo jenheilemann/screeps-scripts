@@ -32,9 +32,18 @@ class Courier extends GenericCreep {
   }
 
   makeDecisions() {
-    if(this.creep.carry.energy < this.creep.carryCapacity) {
+    if (this.creep.carry.energy == 0) {
+      this.memory.collect = true
+    }
+    if (this.memory.collect && this.creep.carry.energy == this.creep.carryCapacity){
+      this.memory.collect = false
+    }
+
+    if(this.memory.collect) {
+      this.memory.parking = false
       return this.collect()
     }
+
     if (this.courier() === false){
       this.moveOffRoad()
     }

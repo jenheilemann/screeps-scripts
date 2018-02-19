@@ -100,6 +100,7 @@ class Generic {
       return false
     }
 
+    this.memory.parking = false
     if (!this.creep.pos.isNearTo(container)) {
       return this.creep.moveTo(container, STYLE['collect'])
     }
@@ -114,6 +115,7 @@ class Generic {
 
     var targets = this.roomManager.energyHogs()
     if(targets.length > 0) {
+      this.memory.parking = false
       if( this.creep.pos.isNearTo(targets[0]) ) {
         return this.creep.transfer(targets[0], RESOURCE_ENERGY)
       }
@@ -149,8 +151,6 @@ class Generic {
       repairable = _.shuffle(structures)[0]
       this.memory.repairable = repairable.id
       this.memory.repairStarted = Game.time
-      this.memory.parking = false
-      //console.log(repairable, this.memory.repariable, this.memory.repairStarted, this.parking)
     } else {
       repairable = Game.getObjectById(this.memory.repairable)
       // something got destroyed, probably
@@ -165,6 +165,7 @@ class Generic {
       }
     }
     if(repairable) {
+      this.memory.parking = false
       if(this.creep.pos.inRangeTo(repairable, 3)) {
         this.creep.repair(repairable)
       } else {
@@ -186,16 +187,22 @@ class Generic {
         this.memory.parking = false
         this.creep.move(_.shuffle([LEFT, TOP_LEFT, TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT])[0])
       }
+      return this.creep.say('???')
     }
     this.creep.say(`🚬`)
   }
 
   findParkingSpot() {
     var pos = this.creep.pos
-    var area = this.creep.room.lookAtArea(pos.x-1,pos.y-1,pos.x+1,pos.y+1);
-    for (var x in area) {
-      for (var y in area[x]) {
-        if (this._locationIsParkingAppropriate(area[x][y])) {
+    var current = this.creep.room.lookAt(pos)
+    if (this._locationIsParkingAppropriate(current)) {
+        return pos;
+    }
+
+    var area = this.creep.room.lookAtArea(pos.y-1,pos.x-1,pos.y+1,pos.x+1);
+    for (var y in area) {
+      for (var x in area[y]) {
+        if (this._locationIsParkingAppropriate(area[y][x]) === true) {
           return new RoomPosition(x,y,this.creep.room.name)
         }
       }
@@ -205,13 +212,13 @@ class Generic {
 
   _locationIsParkingAppropriate(data) {
     for (var i in data) {
-      if (data[i].type == 'creep' && !data[i].creep.id !== this.creep.id) {
+      if (data[i].type === 'creep' && data[i].creep.id !== this.creep.id) {
         return false
       }
-      if (data[i].type == 'structure') {
+      if (data[i].type === 'structure') {
         return false
       }
-      if (data[i].type == 'terrain' && data[i].terrain == 'wall'){
+      if (data[i].type === 'terrain' && data[i].terrain === 'wall'){
         return false
       }
     }

@@ -38,7 +38,7 @@ class HandyBot extends GenericCreep{
   }
 
   makeDecisions() {
-    if(this.memory.repairing && this.creep.carry.energy == 0) {
+    if(this.creep.carry.energy == 0) {
       this.memory.repairing = false;
     }
     if(!this.memory.repairing && this.creep.carry.energy == this.creep.carryCapacity) {
@@ -46,7 +46,10 @@ class HandyBot extends GenericCreep{
     }
 
     if(this.memory.repairing) {
-      return this.repair()
+      if (this.repair() === false) {
+        this.moveOffRoad()
+      }
+      return
     }
 
     if (this.collect() === false){
