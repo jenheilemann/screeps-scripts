@@ -100,8 +100,7 @@ const POPULATION_DISTRIBUTION = {
   },
   courier:   {
     goal: function(rm){
-      var containers = _.filter(_.map(rm.sources(), (s) => s.container()), (c) => !c.isNull() )
-      return Math.floor(rm.energyHogs().length/7) + containers.length
+      return rm.sources().length
     },
     max: 10,
     minExtensions: 0

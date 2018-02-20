@@ -185,6 +185,13 @@ class RoomManager {
     return this._repairBarriers
   }
 
+  droppedEnergy() {
+    if (!this._droppedEnergy) {
+      this._droppedEnergy = _.sortBy(this.room.find(FIND_DROPPED_RESOURCES, { filter: { resourceType: RESOURCE_ENERGY }}), 'amount')
+    }
+    return this._droppedEnergy
+  }
+
   creepsByRole() {
     if (!this._creepsByRole) {
       this._creepsByRole = {

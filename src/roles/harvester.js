@@ -41,7 +41,7 @@ class Harvester extends GenericCreep {
   makeDecisions() {
     this.placeRoadConstructions()
     if(this.creep.carryCapacity == 0) {
-      return this.harvest()
+      return this.harvest(true)
     }
 
     if (this.creep.memory.harvesting && this.creep.carry.energy == this.creep.carryCapacity ) {

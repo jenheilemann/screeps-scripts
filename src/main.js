@@ -22,6 +22,8 @@ require('thirdparty_creeptalk')({
 // Various extensions to the base game objects
 require(`extensions_structure`)
 require(`extensions_structure_container`)
+require(`extensions_structure_extension`)
+require(`extensions_structure_spawn`)
 global.StructureNull = require(`extensions_structure_null`)
 require(`extensions_construction_site`)
 require(`extensions_source`)

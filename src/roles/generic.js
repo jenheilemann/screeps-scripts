@@ -1,17 +1,17 @@
 'use strict'
 
 const STYLE = {
-  move:    { visualizePathStyle: {stroke: '#ffffff', width: 0.3}},
-  collect: { visualizePathStyle: {stroke: '#ffffff', width: 0.3}},
-  harvest: { visualizePathStyle: {stroke: '#ffbb33', width: 0.3}},
-  build:   { visualizePathStyle: {stroke: '#aaccff', width: 0.3}},
-  upgrade: { visualizePathStyle: {stroke: '#55ff55', width: 0.3}},
-  courier: { visualizePathStyle: {stroke: '#ffaaff', width: 0.3}},
-  repair:  { visualizePathStyle: {stroke: '#aaaaff', width: 0.3}},
+  move:    {stroke: '#ffffff', width: 0.1, opacity: 0.6},
+  collect: {stroke: '#ffffff', width: 0.1, opacity: 0.6},
+  collect: {stroke: '#ff33ff', width: 0.1, opacity: 0.6},
+  harvest: {stroke: '#ffbb33', width: 0.1, opacity: 0.6},
+  build:   {stroke: '#aaccff', width: 0.1, opacity: 0.6},
+  upgrade: {stroke: '#55ff55', width: 0.1, opacity: 0.6},
+  courier: {stroke: '#ffaaff', width: 0.1, opacity: 0.6},
+  repair:  {stroke: '#aaaaff', width: 0.1, opacity: 0.6},
 }
 
 class Generic {
-
   constructor(creep, roomManager) {
     this.creep = creep
     this.roomManager = roomManager
@@ -64,11 +64,11 @@ class Generic {
     var pos = this.creep.pos
 
     if (harvestToContainer && container && !pos.isEqualTo(container)) {
-      return this.creep.moveTo(container, STYLE['harvest'])
+      return this.creep.moveTo(container, { visualizePathStyle: STYLE['harvest']})
     }
 
     if(!pos.isNearTo(this.source)) {
-      return this.creep.moveTo(this.source, STYLE['harvest']);
+      return this.creep.moveTo(this.source, { visualizePathStyle: STYLE['harvest']});
     }
 
     this.creep.harvest(this.source)
@@ -95,7 +95,7 @@ class Generic {
 
     // build roads
     var roads = targets.filter((c) => c.structureType == STRUCTURE_ROAD)
-    if(road.length > 0) {
+    if(roads.length > 0) {
       return this.buildOrMoveToTarget(roads[0])
     }
     return false
@@ -106,7 +106,7 @@ class Generic {
       this.creep.build(target)
       return true
     }
-    return this.creep.moveTo(target, STYLE['build'])
+    return this.creep.moveTo(target,{ visualizePathStyle: STYLE['build'] })
   }
 
   collect() {
@@ -117,11 +117,23 @@ class Generic {
       return false
     }
 
-    this.memory.parking = false
     if (!this.creep.pos.isNearTo(container)) {
-      return this.creep.moveTo(container, STYLE['collect'])
+      return this.creep.moveTo(container,{visualizePathStyle: STYLE['collect']})
     }
     return this.creep.withdraw(container, RESOURCE_ENERGY)
+  }
+
+  gatherDropped() {
+    var energy = this.roomManager.droppedEnergy()
+
+    if (energy.length == 0) {
+      return false
+    }
+
+    if (!this.creep.pos.isNearTo(energy[0])) {
+      return this.creep.moveTo(energy[0],{visualizePathStyle: STYLE['pickup']})
+    }
+    return this.creep.pickup(energy[0])
   }
 
   refillSpawns() {
@@ -130,22 +142,36 @@ class Generic {
       return false
     }
 
-    var targets = this.roomManager.energyHogs()
-    var dots = targets.filter((s) => s.structureType === STRUCTURE_EXTENSION)
-    if(dots.length > 0) {
-      return this.transferOrMoveTo(dots[0])
+    var addressee = Game.getObjectById(this.memory.addressee)
+    if (!addressee || addressee.isFull()) {
+      this.memory.addressee = null
+      addressee = this.findHungryDotOrSpawn()
+      if (!addressee) {
+        return false
+      }
+      this.memory.addressee = addressee.id
     }
-    var spawns = targets.filter((s) => s.structureType === STRUCTURE_SPAWN )
-    if (spawns.length > 0) {
-      return this.transferOrMoveTo(spawns[0])
+    return this.transferOrMoveTo(addressee)
+  }
+
+  findHungryDotOrSpawn() {
+    var dot = this.creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
+      filter: (s) => s.structureType === STRUCTURE_EXTENSION && !s.isFull()
+    })
+    if (dot) {
+      return dot
     }
-    return false
+
+    var spawn = this.creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
+      filter: (s) => s.structureType === STRUCTURE_SPAWN && !s.isFull()
+    })
+    return spawn
   }
 
   refillOpenContainers() {
     var containers = this.roomManager.openContainers().filter((c) => !c.isFull())
 
-    if (containers.length < 0) {
+    if (containers.length == 0) {
       return false
     }
     return this.transferOrMoveTo(containers[0])
@@ -153,10 +179,10 @@ class Generic {
 
   transferOrMoveTo(target){
     this.memory.parking = false
-    if( this.creep.pos.isNearTo(target) ) {
-      return this.creep.transfer(target, RESOURCE_ENERGY)
+    if( !this.creep.pos.isNearTo(target) ) {
+      this.creep.moveTo(target, { reusePath: 10, visualizePathStyle: STYLE['courier']});
     }
-    return this.creep.moveTo(target, STYLE['courier']);
+    return this.creep.transfer(target, RESOURCE_ENERGY)
   }
 
   upgrade() {
@@ -167,7 +193,7 @@ class Generic {
 
     var controller = this.roomManager.controller()
     if( !this.creep.pos.inRangeTo(controller, 3) ) {
-      return this.creep.moveTo(controller, STYLE['upgrade']);
+      return this.creep.moveTo(controller, { reusePath: 10, visualizePathStyle: STYLE['upgrade']});
     }
     return this.creep.upgradeController(controller)
   }
@@ -204,7 +230,7 @@ class Generic {
       if(this.creep.pos.inRangeTo(repairable, 3)) {
         this.creep.repair(repairable)
       } else {
-        this.creep.moveTo(repairable, STYLE['repair']);
+        this.creep.moveTo(repairable, {visualizePathStyle: STYLE['repair']});
       }
       return true
     }
@@ -216,8 +242,9 @@ class Generic {
     if (!this.memory.parking) {
       parkingSpot = this.findParkingSpot()
       if (typeof(parkingSpot) == 'object' ) {
-        this.creep.moveTo(parkingSpot)
-        this.memory.parking = true
+        if (this.creep.moveTo(parkingSpot) === OK) {
+          this.memory.parking = true
+        }
       } else {
         this.memory.parking = false
         this.creep.move(_.shuffle([LEFT, TOP_LEFT, TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT])[0])

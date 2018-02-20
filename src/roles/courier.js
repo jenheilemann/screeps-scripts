@@ -40,14 +40,20 @@ class Courier extends GenericCreep {
 
     if(this.memory.collect) {
       this.memory.parking = false
-      return this.collect()
+      if (this.collect() !== false) {
+        return
+      }
+      return this.gatherDropped()
     }
 
-    if (this.refillSpawns() === false){
-      if (this.refillOpenContainers() === false ) {
-        this.moveOffRoad()
-      }
+    if (this.refillSpawns() !== false){
+      return
     }
+    if (this.refillOpenContainers() !== false ) {
+      return
+    }
+
+    this.moveOffRoad()
   }
 
 }
