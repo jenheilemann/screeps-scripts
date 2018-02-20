@@ -43,8 +43,10 @@ class Courier extends GenericCreep {
       return this.collect()
     }
 
-    if (this.courier() === false){
-      this.moveOffRoad()
+    if (this.refillSpawns() === false){
+      if (this.refillOpenContainers() === false ) {
+        this.moveOffRoad()
+      }
     }
   }
 

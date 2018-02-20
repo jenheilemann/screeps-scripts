@@ -57,7 +57,7 @@ class Harvester extends GenericCreep {
       return this.harvest(overContainer)
     }
 
-    if (this.courier() === false) {
+    if (this.refillSpawns() === false) {
       this.upgrade()
     }
   }

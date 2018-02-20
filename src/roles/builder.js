@@ -14,7 +14,7 @@ class Builder extends WorkerCreep {
     }
 
     if(this.creep.memory.building) {
-      if (this.build() == false && this.repair() == false) {
+      if (this.build() === false && this.repair() === false) {
         this.moveOffRoad()
       }
       return

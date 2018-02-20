@@ -78,7 +78,22 @@ const POPULATION_DISTRIBUTION = {
       total = _.sum(_.map(sites, 'progressTotal'))
       remaining = total - progress
 
-      return Math.ceil(remaining/6000)
+      switch(true) {
+        case remaining <= 5000:
+          return 1
+        case remaining <= 11000:
+          return 2
+        case remaining <= 18000:
+          return 3
+        case remaining <= 26000:
+          return 4
+        case remaining <= 35000:
+          return 5
+        case remaining <= 45000:
+          return 6
+        default:
+          return 7
+      }
     },
     max: 7,
     minExtensions: 0

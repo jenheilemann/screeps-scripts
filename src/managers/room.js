@@ -148,6 +148,20 @@ class RoomManager {
     return this._containers
   }
 
+  sourceContainers() {
+    if (!this._sourceContainers) {
+      this._sourceContainers = _.map(this.sources(), (s) => s.container() )
+    }
+    return this._sourceContainers
+  }
+
+  openContainers() {
+    if (!this._openContainers) {
+      this._openContainers = this.containers().filter((c) => !this.sourceContainers().includes(c))
+    }
+    return this._openContainers
+  }
+
   repairNeededStructures(percent = 0.8) {
     if (!this._repairNeeded) {
       this._repairNeeded = _.filter(this.structures(),

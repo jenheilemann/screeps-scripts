@@ -85,16 +85,28 @@ class Generic {
   }
 
   build() {
-    var targets = this.roomManager.constructionSites();
-    if(targets.length) {
-      if(this.creep.pos.inRangeTo(targets[0],3)) {
-        this.creep.build(targets[0])
-        return true
-      }
-      this.creep.moveTo(targets[0], STYLE['build']);
-      return true
+    var targets = this.roomManager.constructionSites()
+    var nonRoad = targets.filter((c) => c.structureType != STRUCTURE_ROAD)
+
+    // build non-road stuff, probably more important
+    if(nonRoad.length > 0) {
+      return this.buildOrMoveToTarget(nonRoad[0])
+    }
+
+    // build roads
+    var roads = targets.filter((c) => c.structureType == STRUCTURE_ROAD)
+    if(road.length > 0) {
+      return this.buildOrMoveToTarget(roads[0])
     }
     return false
+  }
+
+  buildOrMoveToTarget(target) {
+    if(this.creep.pos.inRangeTo(target,3)) {
+      this.creep.build(target)
+      return true
+    }
+    return this.creep.moveTo(target, STYLE['build'])
   }
 
   collect() {
@@ -102,13 +114,6 @@ class Generic {
     var trunkSpace = this.creep.carryCapacity - _.sum(this.creep.carry)
 
     if (!container || container.store[RESOURCE_ENERGY] < trunkSpace) {
-      container = _.filter(this.roomManager.structures(),
-        (i) => i.structureType == STRUCTURE_CONTAINER &&
-                   i.store[RESOURCE_ENERGY] >= trunkSpace
-        )[0];
-    }
-
-    if (!container) {
       return false
     }
 
@@ -119,21 +124,39 @@ class Generic {
     return this.creep.withdraw(container, RESOURCE_ENERGY)
   }
 
-  courier() {
+  refillSpawns() {
     // can't carry anything anyway, stay still
     if ( this.creep.getActiveBodyparts(CARRY) == 0) {
       return false
     }
 
     var targets = this.roomManager.energyHogs()
-    if(targets.length > 0) {
-      this.memory.parking = false
-      if( this.creep.pos.isNearTo(targets[0]) ) {
-        return this.creep.transfer(targets[0], RESOURCE_ENERGY)
-      }
-      return this.creep.moveTo(targets[0], STYLE['courier']);
+    var dots = targets.filter((s) => s.structureType === STRUCTURE_EXTENSION)
+    if(dots.length > 0) {
+      return this.transferOrMoveTo(dots[0])
+    }
+    var spawns = targets.filter((s) => s.structureType === STRUCTURE_SPAWN )
+    if (spawns.length > 0) {
+      return this.transferOrMoveTo(spawns[0])
     }
     return false
+  }
+
+  refillOpenContainers() {
+    var containers = this.roomManager.openContainers().filter((c) => !c.isFull())
+
+    if (containers.length < 0) {
+      return false
+    }
+    return this.transferOrMoveTo(containers[0])
+  }
+
+  transferOrMoveTo(target){
+    this.memory.parking = false
+    if( this.creep.pos.isNearTo(target) ) {
+      return this.creep.transfer(target, RESOURCE_ENERGY)
+    }
+    return this.creep.moveTo(target, STYLE['courier']);
   }
 
   upgrade() {
