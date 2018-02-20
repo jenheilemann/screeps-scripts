@@ -47,31 +47,37 @@ class Worker extends GenericCreep {
 
     switch(true) {
       case extensions == 0:
-        return [WORK, CARRY, MOVE, MOVE]
+        return [WORK, CARRY, MOVE]
         break;
       case extensions == 1:
         return [WORK, CARRY, CARRY, CARRY, MOVE, MOVE]
         break;
-      case extensions == 2:
+      case extensions <= 3:
         return [WORK, WORK, CARRY, CARRY, MOVE, MOVE]
         break;
       case extensions <= 5:
-        return [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE]
+        return [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE]
         break;
-      case extensions <= 10:
+      case extensions <= 9:
         return [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE]
         break;
-      case extensions <= 20:
+      case extensions <= 13:
         return [
-          WORK, WORK, WORK, WORK,
+          WORK,  WORK,  WORK,  WORK,
+          CARRY, CARRY, CARRY, CARRY,
+          MOVE,  MOVE,  MOVE,  MOVE]
+        break;
+      case extensions <= 17:
+        return [
+          WORK,  WORK,  WORK,  WORK,  WORK,
           CARRY, CARRY, CARRY, CARRY, CARRY,
-          MOVE, MOVE, MOVE, MOVE]
+          MOVE,  MOVE,  MOVE,  MOVE,  MOVE]
         break;
       default:
         return [
-          WORK, WORK, WORK, WORK, WORK, WORK,
-          CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
-          MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]
+          WORK,  WORK,  WORK,  WORK,  WORK,  WORK,
+          CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
+          MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE]
     }
   }
 }

@@ -13,23 +13,21 @@ class Courier extends GenericCreep {
     // CARRY          50
     // WORK           100
 
-    switch(true) {
-      case extensions == 0:
-      case roomManager.creepsByRole()['courier'].length === 0:
-        return [CARRY, CARRY, MOVE, CARRY, CARRY, MOVE]
-        break;
-      case extensions <= 5:
-        return [CARRY, CARRY, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE]
-        break;
-      case extensions <= 10:
-        return [CARRY, CARRY, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE]
-        break;
-      case extensions <= 20:
-        return [CARRY, CARRY, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE]
-        break;
-      default:
-        return [CARRY, CARRY, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE, CARRY, CARRY, MOVE]
+    var totalCapacity = 300 + extensions * 50
+    var count = Math.floor(totalCapacity/150)
+
+    if (roomManager.creepsByRole()['courier'].length === 0) {
+      // force two sets of parts because we can only be guaranteed 300 energy.
+      count = 2
     }
+
+    var partsBlock = [CARRY, CARRY, MOVE]
+    var parts = []
+    for (var i = count - 1; i >= 0; i--) {
+      parts = parts.concat(partsBlock)
+    }
+
+    return parts
   }
 
   makeDecisions() {
