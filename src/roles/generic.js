@@ -32,7 +32,8 @@ class Generic {
     return {
       role: this.role(),
       source: source_id,
-      container: container_id
+      container: container_id,
+      mainRoom: roomManager.room.name
     }
   }
 

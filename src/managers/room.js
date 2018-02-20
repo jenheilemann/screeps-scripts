@@ -6,9 +6,9 @@ const CreepManager = require('managers_creep')
 class RoomManager {
 
   constructor(room) {
-    this._room = room
-    if (!this._room.memory) {
-      this._room.memory = {}
+    this.room = room
+    if (!this.room.memory) {
+      this.room.memory = {}
     }
   }
 
@@ -22,10 +22,10 @@ class RoomManager {
       return
     }
 
-    if (!this.memory().censusTaken || Game.time - this.memory().censusTaken >= 47 ) {
+    if (!this.memory().censusTaken || Game.time - this.memory().censusTaken >= 59 ) {
       const PopulationManager = require('managers_population')
       var population = new PopulationManager(this)
-      console.log(`Running census for room ${this.room().name}`)
+      console.log(`Running census for room ${this.room.name}`)
       this.memory().nextCreep = population.neededRole()
       this.memory().censusTaken = Game.time
     }
@@ -41,11 +41,7 @@ class RoomManager {
   }
 
   memory() {
-    return this._room.memory
-  }
-
-  room() {
-    return this._room
+    return this.room.memory
   }
 
   defconLevel() {
@@ -60,7 +56,7 @@ class RoomManager {
   }
 
   controller() {
-    return this.room().controller
+    return this.room.controller
   }
 
   oldestCreep() {
@@ -79,7 +75,7 @@ class RoomManager {
 
   structures() {
     if (!this._structures) {
-      this._structures = this.room().find(FIND_STRUCTURES);
+      this._structures = this.room.find(FIND_STRUCTURES);
     }
     if (!this.memory().structures || this.memory().structures.length != this._structures.length) {
       this.memory().structures = _.map(this._structures, `id`)
@@ -90,7 +86,7 @@ class RoomManager {
 
   spawns() {
     if (!this._spawns) {
-      this._spawns = this.room().find(FIND_MY_SPAWNS)
+      this._spawns = this.room.find(FIND_MY_SPAWNS)
     }
     if (!this.memory().spawns || this.memory().spawns.length != this._spawns.length) {
       this.memory().spawns = _.map(this._spawns, 'id')
@@ -113,7 +109,7 @@ class RoomManager {
 
   constructionSites() {
     if (!this._constructionSites) {
-      this._constructionSites = this.room().find(FIND_MY_CONSTRUCTION_SITES);
+      this._constructionSites = this.room.find(FIND_MY_CONSTRUCTION_SITES);
     }
 
     return this._constructionSites
@@ -127,7 +123,7 @@ class RoomManager {
           this._sources.push(Game.getObjectById(this.memory().sources[i]))
         }
       } else {
-        this._sources = this.room().find(FIND_SOURCES)
+        this._sources = this.room.find(FIND_SOURCES)
       }
     }
     if (!this.memory().sources) {
@@ -195,7 +191,7 @@ class RoomManager {
 
   creeps() {
     if (!this._creeps) {
-      this._creeps = this.room().find(FIND_MY_CREEPS)
+      this._creeps = this.room.find(FIND_MY_CREEPS)
     }
     return this._creeps
   }
