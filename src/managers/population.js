@@ -17,7 +17,7 @@ class PopulationManager {
         return false
       }
 
-      total = creepsByRole[role].length
+      total = (creepsByRole[role] || []).length
       if ( total >= DISTRIBUTION[role].goal(rm) ) {
         return false
       }

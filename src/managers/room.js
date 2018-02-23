@@ -78,16 +78,20 @@ class RoomManager {
   }
 
   structures() {
-    var structures = this.cache.remember('structures', function(self){
+    return this.cache.remember('structures', function(self){
       return self.room.find(FIND_STRUCTURES, { filter: (s) => s.isActive() })
     }, [this])
+  }
 
-    return structures
+  structuresByType() {
+    return this.cache.remember('structuresByType', function(structures) {
+      return _.groupBy(structures, 'structureType')
+    }, [this.structures()])
   }
 
   spawns() {
     return this.cache.remember('spawns', function(self){
-      return self.room.find(FIND_MY_SPAWNS)
+      return self.structuresByType()[STRUCTURE_SPAWN] || []
     }, [this]);
   }
 
@@ -122,13 +126,13 @@ class RoomManager {
 
   extensions() {
     return this.cache.remember('extensions', function(self){
-      return _.filter(self.structures(), (s) => s.isExtension() )
+      return self.structuresByType()[STRUCTURE_EXTENSION] || []
     }, [this]);
   }
 
   containers() {
     return this.cache.remember('containers', function(self){
-      return _.filter(self.structures(), (s) => s.isContainer() )
+      return self.structuresByType()[STRUCTURE_CONTAINER] || []
     }, [this]);
   }
 
@@ -145,9 +149,9 @@ class RoomManager {
   }
 
   barriers() {
-    return this.cache.remember('barriers', function(structures){
-      return structures.filter((s) => s.isBarrier())
-    }, [this.structures()])
+    return this.cache.remember('barriers', function(struct){
+      return (struct[STRUCTURE_RAMPART] || []).concat(struct[STRUCTURE_WALL] || [])
+    }, [this.structuresByType()])
   }
 
   energyAvailableForSpawning() {
@@ -159,9 +163,15 @@ class RoomManager {
   }
 
   towers() {
-    return this.cache.remember('towers', function(self){
-      return _.filter(self.structures(), (s) => s.isTower() )
-    }, [this]);
+    return this.cache.remember('towers', function(struct){
+      return struct[STRUCTURE_TOWER] || []
+    }, [this.structuresByType()]);
+  }
+
+  storage() {
+    return this.cache.remember('storage', function(struct) {
+      return (struct[STRUCTURE_STORAGE] || [])[0]
+    }, [this.structuresByType()])
   }
 
   repairNeededStructures(percent = 0.8) {
@@ -172,16 +182,27 @@ class RoomManager {
   }
 
   repairNeededBarriers(percent = 0.8) {
-    return this.cache.remember(`repairBarriers_${percent}`, function(barriers, percent){
-      if (barriers.length == 0) {
-        return []
-      }
+    if (this.barriers().length == 0) {
+      return []
+    }
 
-      var avg =  _.sum(barriers, 'hits') / barriers.length
-      return _.filter(barriers, function(s) {
-        return s.repairNeeded(percent) && (s.hits < avg + 4000 )
+    var avg = this.cache.remember('barrierAvgHits', function(barriers){
+      return _.sum(barriers, 'hits') / barriers.length
+    }, [this.barriers()])
+
+    return this.cache.remember(`repairBarriers_${percent}`,
+      function(barriers, percent, avg){
+        return _.filter(barriers, function(s) {
+          return s.repairNeeded(percent) && (s.hits < avg + 4000 )
         });
-    }, [this.barriers(), percent])
+      },
+    [this.barriers(), percent, avg])
+  }
+
+  rottingRamparts() {
+    return this.cache.remember('rottingRamparts', function(barriers){
+      return _.filter(barriers, (s) => s.isRampart() && s.hits < 600)
+    }, [this.repairNeededBarriers()])
   }
 
   droppedEnergy() {
@@ -218,17 +239,7 @@ class RoomManager {
 
   creepsByRole() {
     return this.cache.remember('creepsByRole', function(creeps) {
-      var collection = {
-        harvester: [],
-        builder: [],
-        courier: [],
-        upgrader: [],
-        defender: []
-      }
-      for (var i in creeps) {
-        collection[creeps[i].memory.role].push(creeps[i])
-      }
-      return collection
+      return _.groupBy(creeps, (c) => c.memory.role)
     }, [this.creeps()])
   }
 

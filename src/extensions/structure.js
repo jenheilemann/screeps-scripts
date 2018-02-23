@@ -20,3 +20,6 @@ Structure.prototype.isTower = function() { return false }
 Structure.prototype.isRampart = function() {
   return this.structureType === STRUCTURE_RAMPART
 }
+Structure.prototype.isStorage = function() {
+  return this.structureType === STRUCTURE_STORAGE
+}

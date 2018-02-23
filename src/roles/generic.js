@@ -9,6 +9,8 @@ const STYLE = {
   upgrade: {stroke: '#55ff55', width: 0.1, opacity: 0.6},
   courier: {stroke: '#ffaaff', width: 0.1, opacity: 0.6},
   repair:  {stroke: '#aaaaff', width: 0.1, opacity: 0.6},
+  renew:   {stroke: '#aaaaff', width: 0.1, opacity: 0.6},
+  recycle: {stroke: '#aaaaff', width: 0.1, opacity: 0.6},
 }
 
 class Generic {
@@ -203,6 +205,20 @@ class Generic {
     return this.transferOrMoveTo(_.min(towers, 'energy'))
   }
 
+  refillStorage() {
+    var storage = this.roomManager.storage()
+    if (!storage || storage.isFull()) {
+      return false
+    }
+
+    var available = this.container.store.energy
+    if (available >= this.creep.carryCapacity*2 ||
+        available > this.container.storeCapacity) {
+      return this.transferOrMoveTo(storage)
+    }
+    return false
+  }
+
   transferOrMoveTo(target, resource = RESOURCE_ENERGY){
     this.memory.parking = false
     if( !this.creep.pos.isNearTo(target) ) {
@@ -224,10 +240,10 @@ class Generic {
     return this.creep.upgradeController(controller)
   }
 
-  repair() {
-    var structures, repairable
+  repair(structures) {
+    var repairable
 
-    if (this.memory.repariable && Game.time - this.memory.repairStarted < 120) {
+    if (this.memory.repairable && Game.time - this.memory.repairStarted < 25) {
       repairable = Game.getObjectById(this.memory.repairable)
       // something got destroyed, probably
       if (!repairable) {
@@ -241,51 +257,75 @@ class Generic {
     }
 
     if (!repairable) {
-      structures = this.roomManager.repairNeededStructures(0.95).concat(
-                   this.roomManager.repairNeededBarriers())
-
       // No repairable structures found
       if (structures.length == 0) {
         return false
       }
 
-      repairable = _.min(structures, (s) => s.hits/s.hitsMax + Math.random()*0.001)
+      repairable = _.min(structures,
+        (s) => Math.floor(s.hits/s.hitsMax * 10) + Math.random()*0.01
+      );
       this.memory.repairable = repairable.id
-      this.memory.repairStarted = Game.time
     }
 
     if(repairable) {
       this.memory.parking = false
       if(this.creep.pos.inRangeTo(repairable, 3)) {
         this.creep.repair(repairable)
-        if (repairable.isBarrier() && repairable.hits > 300) {
-          var barriers = this.roomManager.repairNeededBarriers()
-          if (barriers.some((b) => b.hits < 300)) {
-            // move on to another one that needs fixed NAOW
-            delete this.memory.repairable
-          }
-        }
       } else {
         this.creep.moveTo(repairable, {visualizePathStyle: STYLE['repair']});
+        this.memory.repairStarted = Game.time
       }
       return true
     }
     return false
   }
 
-  repairRottingRamparts() {
-    var rotting = _.filter(this.roomManager.repairNeededBarriers(),
-      (s) => s.isRampart() && s.hits < 600)
-
-    if (rotting.length == 0) {
-      return false
+  renewOrRecycle(spawn) {
+    if (this.creep.ticksToLive < 50) {
+      this.memory.renewing = true
+    }
+    if (CREEP_LIFETIME - this.creep.ticksToLive < this.ticksPerRenewal()) {
+      this.memory.renewing = false
     }
 
-    if (!_.map(rotting, 'id').includes(this.memory.repairable)) {
-      this.memory.repairable = _.min(rotting, (r) => r.hits + Math.random())
-      this.memory.repairStarted = Game.time
+    if (this.memory.renewing) {
+      if (this.worthRenewing()) {
+        return this.renew(spawn)
+      } else {
+        return this.recycle(spawn)
+      }
     }
-    return this.repair()
+    return false
+  }
+
+  renew(spawn) {
+    if (this.creep.pos.inRangeTo(spawn, 1)) {
+      this.creep.transfer(spawn, RESOURCE_ENERGY)
+      this.creep.say('🛌💤💤') // person in bed
+      return spawn.renewCreep(this.creep)
+    }
+    return this.creep.moveTo(spawn, {visualizePathStyle: STYLE['renew']})
+  }
+
+  worthRenewing() {
+    return this.creep.body.length >= this.constructor.orderParts(this.roomManager, {}).length
+  }
+
+  ticksPerRenewal() {
+    return Math.floor(600/this.creep.body.length)
+  }
+
+  recycle(spawn) {
+    if (this.creep.pos.inRangeTo(spawn, 2)) {
+      this.creep.transfer(spawn, RESOURCE_ENERGY)
+      this.creep.say('👋💔♻️') // goodbye, cruel world
+    }
+    if (this.creep.pos.inRangeTo(spawn, 1)) {
+      this.creep.transfer(spawn, RESOURCE_ENERGY)
+      return spawn.recycleCreep(this.creep)
+    }
+    return this.creep.moveTo(spawn, {visualizePathStyle: STYLE['recycle']})
   }
 
   moveOffRoad() {

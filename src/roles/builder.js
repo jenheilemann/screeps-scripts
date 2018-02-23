@@ -30,21 +30,29 @@ class Builder extends WorkerCreep {
   }
 
   makeDecisions() {
+    if (this.renewOrRecycle(this.roomManager.spawns()[0]) !== false) {
+      return
+    }
+
     if(this.creep.memory.building && this.creep.carry.energy == 0) {
-      this.creep.memory.building = false;
+      this.creep.memory.reparable = null
+      this.creep.memory.building = false
     }
     if(!this.creep.memory.building && this.creep.carry.energy == this.creep.carryCapacity) {
-      this.creep.memory.building = true;
+      this.creep.memory.building = true
     }
 
     if(this.creep.memory.building) {
-      if (this.repairRottingRamparts() !== false) {
+      if (this.repair(this.roomManager.rottingRamparts()) !== false) {
         return
       }
       if (this.build() !== false) {
         return
       }
-      if (this.repair() !== false) {
+      if (this.repair(this.roomManager.repairNeededStructures(0.95)) !== false) {
+        return
+      }
+      if (this.repair(this.roomManager.repairNeededBarriers()) !== false) {
         return
       }
       this.moveOffRoad()

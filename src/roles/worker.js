@@ -34,7 +34,7 @@ class Worker extends GenericCreep {
   }
 
   static orderParts(roomManager, memory) {
-    var extensions = Math.floor(roomManager.extensions().length/3)
+    var extensions = Math.floor(roomManager.extensions().length/2)
     var spawns = roomManager.spawns().length
 
     // TOUGH          10

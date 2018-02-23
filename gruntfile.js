@@ -88,6 +88,6 @@ module.exports = function(grunt) {
 
     });
 
-    grunt.registerTask('deploy',  ['clean', 'copy:screeps', 'file_append:versioning', 'screeps']);
-    grunt.registerTask('private',  ['clean', 'copy:screeps', 'file_append:versioning', 'rsync:private']);
+    grunt.registerTask('deploy',  ['clean', 'copy:screeps', 'file_append:versioning', 'screeps', 'clean']);
+    grunt.registerTask('private',  ['clean', 'copy:screeps', 'file_append:versioning', 'rsync:private', 'clean']);
 }

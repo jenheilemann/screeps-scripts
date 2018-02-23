@@ -32,6 +32,11 @@ class Courier extends GenericCreep {
   }
 
   makeDecisions() {
+
+    if (this.renewOrRecycle(this.roomManager.spawns()[0]) !== false) {
+      return
+    }
+
     if (this.creep.carry.energy == 0) {
       this.memory.collect = true
     }
@@ -59,6 +64,9 @@ class Courier extends GenericCreep {
       return
     }
     if (this.refillTowers() !== false ) {
+      return
+    }
+    if (this.refillStorage() !== false ) {
       return
     }
 

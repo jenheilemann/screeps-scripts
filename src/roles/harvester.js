@@ -44,6 +44,11 @@ class Harvester extends GenericCreep {
 
   makeDecisions() {
     this.placeRoadConstructions()
+
+    if (this.renewOrRecycle(this.roomManager.spawns()[0]) !== false) {
+      return
+    }
+
     if(this.creep.carryCapacity == 0) {
       return this.harvest(true)
     }

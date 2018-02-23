@@ -12,6 +12,8 @@ if(!Memory.SCRIPT_VERSION || Memory.SCRIPT_VERSION != SCRIPT_VERSION) {
   console.log('New code uploded: ' + SCRIPT_VERSION)
 }
 
+require('constants')
+
 /* Add "creep talk" library - https://github.com/screepers/creeptalk */
 const language = require('thirdparty_creeptalk_emoji')
 require('thirdparty_creeptalk')({
@@ -26,6 +28,7 @@ require(`extensions_structure_container`)
 require(`extensions_structure_extension`)
 require(`extensions_structure_spawn`)
 require(`extensions_structure_tower`)
+require(`extensions_structure_storage`)
 global.StructureNull = require(`extensions_structure_null`)
 require(`extensions_construction_site`)
 require(`extensions_source`)
