@@ -11,3 +11,12 @@ Structure.prototype.isBarrier = function () {
 Structure.prototype.isNull = function() {
   return false
 }
+
+Structure.prototype.exists = function() { return true }
+Structure.prototype.needsEnergy = function() { return false }
+Structure.prototype.isExtension = function() { return false }
+Structure.prototype.isContainer = function() { return false }
+Structure.prototype.isTower = function() { return false }
+Structure.prototype.isRampart = function() {
+  return this.structureType === STRUCTURE_RAMPART
+}

@@ -3,61 +3,45 @@
 class PopulationManager {
 
   constructor(roomManager) {
-    this._roomManager = roomManager
-    this._population = this.calculateDistribution()
+    this.roomManager = roomManager
   }
 
   neededRole() {
-    var needed = []
-    var count
+    var rm = this.roomManager
+    var creepsByRole = rm.creepsByRole()
+    var numExtensions = rm.extensions().length
+    var total
 
-    for (var role in this._population) {
-      if (this._population[role].minExtensions > this._roomManager.extensions().length) {
-        continue;
+    var needed = _.filter(Object.keys(DISTRIBUTION), function(role) {
+      if (DISTRIBUTION[role].minExtensions > numExtensions) {
+        return false
       }
-      if (this._population[role].total < this._population[role].goal &&
-          this._population[role].total < this._population[role].max ) {
-        count = this._population[role].goal - this._population[role].total
-        needed.push([role, count])
+
+      total = creepsByRole[role].length
+      if ( total >= DISTRIBUTION[role].goal(rm) ) {
+        return false
       }
-    }
+      if (total >= DISTRIBUTION[role].max ) {
+        return false
+      }
+      return true
+    })
 
     if (needed.length == 0) {
       return false
     }
 
-    var sorted = _.sortBy(needed, function(value){
-      if (value[0] == 'harvester') {
-        return -100
-      }
-
-      return -value[1]
+    var max = _.max(needed, function(role){
+      return DISTRIBUTION[role].priority(rm)
     });
 
-    return sorted[0][0]
+    return max
   }
-
-  calculateDistribution() {
-    var distribution = {}
-    var creepsByRole = this._roomManager.creepsByRole()
-
-    for (var role in POPULATION_DISTRIBUTION) {
-      var goal = POPULATION_DISTRIBUTION[role].goal(this._roomManager)
-      distribution[role] = {
-        total: creepsByRole[role].length,
-        goal: goal,
-        max: POPULATION_DISTRIBUTION[role].max,
-        minExtensions: POPULATION_DISTRIBUTION[role].minExtensions
-      }
-    }
-    return distribution
-  }
-
 }
 
 // Distribution calculations per creep role.
 // Most depend on variables from the room data. (`rm` == roomManager)
-const POPULATION_DISTRIBUTION = {
+const DISTRIBUTION = {
   harvester: {
     goal: function(rm){
       var couriers = rm.creepsByRole()['courier']
@@ -66,44 +50,44 @@ const POPULATION_DISTRIBUTION = {
       }
       return 1 * rm.sources().length
     },
-    max: 10,
-    minExtensions: 0
-  },
-  builder:   {
-    goal: function(rm){
-      var sites, progress, total, remaining
-      sites = rm.constructionSites()
-
-      progress = _.sum(_.map(sites, 'progress'))
-      total = _.sum(_.map(sites, 'progressTotal'))
-      remaining = total - progress
-
-      switch(true) {
-        case remaining <= 5000:
-          return 1
-        case remaining <= 11000:
-          return 2
-        case remaining <= 18000:
-          return 3
-        case remaining <= 26000:
-          return 4
-        case remaining <= 35000:
-          return 5
-        case remaining <= 45000:
-          return 6
-        default:
-          return 7
+    max: 6,
+    minExtensions: 0,
+    priority: function(rm) {
+      var harvesters = rm.creepsByRole()['harvester']
+      if (harvesters.length == 0) {
+        return 150
       }
-    },
-    max: 7,
-    minExtensions: 0
+      return 100
+    }
   },
-  courier:   {
+  courier: {
     goal: function(rm){
-      return rm.sources().length
+      return rm.sourceContainers().length
     },
     max: 10,
-    minExtensions: 0
+    minExtensions: 0,
+    priority: function(rm) {
+      var couriers = rm.creepsByRole()['courier']
+      if (couriers.length == 0) {
+        return 140
+      }
+      return 90
+    }
+  },
+  builder: {
+    goal: function(rm){
+      var Builder = require('roles_builder')
+      return Builder.goalPopulation(rm)
+    },
+    max: 2,
+    minExtensions: 0,
+    priority: function(rm) {
+      var builders = rm.creepsByRole()['builder']
+      if (builders.length == 0) {
+        return 50
+      }
+      return 40
+    }
   },
   upgrader:  {
     goal: function(rm) {
@@ -115,35 +99,33 @@ const POPULATION_DISTRIBUTION = {
         return 1
       }
 
-      var cont = rm.containers()
-      var avg = 0
-      var multiplier = 0.5
-      if (cont.length > 1) {
-        avg = _.sum(_.map(cont, ( c) => c.store.energy))/cont.length
-        multiplier = avg > 1500 ? 0.75 : 0.5
-      }
-      return Math.ceil(rm.controllerLevel()*multiplier) + 1
+      var energyPerTick = rm.energyProduction()
+      var Upgrader = require('roles_upgrader')
+      var parts = Upgrader.orderParts(rm, {})
+      // essentially _.filter(p, p == WORK).length
+      var numWorkParts = _.sum(parts, (p) => p === WORK ? 1 : 0)
+      var numBuilders = rm.creepsByRole()['builder'].length
+      var numUpgraders = Math.floor(energyPerTick/numWorkParts) - numBuilders
+
+      return _.max([1, numUpgraders])
     },
-    max: 6,
-    minExtensions: 0
+    max: 5,
+    minExtensions: 0,
+    priority: function(rm) {
+      var upgraders = rm.creepsByRole()['upgrader']
+      if (upgraders.length == 0) {
+        return 60
+      }
+      return 30
+    }
   },
   defender:  {
     goal: function(rm) {
       return rm.defconLevel()
     },
     max: 6,
-    minExtensions: 3
-  },
-  handybot:{
-    goal: function(rm) {
-      // includes roads!
-      var structures = rm.repairNeededStructures().length
-      var barriers = rm.repairNeededBarriers().length
-      var weightedTotal = structures + barriers * 0.5
-      return Math.ceil(weightedTotal/12)
-    },
-    max: 3,
-    minExtensions: 2
+    minExtensions: 3,
+    priority: function(rm) { return 110 }
   }
 }
 

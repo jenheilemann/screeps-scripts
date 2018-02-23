@@ -2,11 +2,14 @@
 
 const CreepFactory = require('managers_creepfactory')
 const CreepManager = require('managers_creep')
+const TowerManager = require('managers_tower')
+const Cache = require('lib_cache')
 
 class RoomManager {
 
   constructor(room) {
     this.room = room
+    this.cache = new Cache()
     if (!this.room.memory) {
       this.room.memory = {}
     }
@@ -15,6 +18,7 @@ class RoomManager {
   run() {
     this.spawnCreeps()
     new CreepManager(this).run()
+    new TowerManager(this).run()
   }
 
   spawnCreeps() {
@@ -22,7 +26,15 @@ class RoomManager {
       return
     }
 
-    if (!this.memory().censusTaken || Game.time - this.memory().censusTaken >= 59 ) {
+    if (!this.memory().censusTaken ) {
+      this.memory().censusTaken = 0
+    }
+
+    if (this.spawns()[0].spawning != null) {
+      return
+    }
+
+    if (Game.time - this.memory().censusTaken >= 59) {
       const PopulationManager = require('managers_population')
       var population = new PopulationManager(this)
       console.log(`Running census for room ${this.room.name}`)
@@ -34,9 +46,9 @@ class RoomManager {
       return
     }
 
-    var factory = new CreepFactory(this, this.memory().nextCreep)
+    var factory = new CreepFactory(this, this.memory().nextCreep, this.spawns()[0])
     if ( factory.buildCreep() ) {
-      this.memory().nextCreep = null
+      this.memory().nextCreep = false
     }
   }
 
@@ -60,161 +72,170 @@ class RoomManager {
   }
 
   oldestCreep() {
-    if (!this._oldestCreep) {
-      if (this.memory().oldestCreep) {
-        this._oldestCreep = Game.getObjectById(this.memory().oldestCreep)
-      } else {
-        this._oldestCreep = _.minBy(creeps(), 'ticksToLive')
-      }
-    }
-    if (!this.memory().oldestCreep) {
-      this.memory().oldestCreep = this._oldestCreep.id
-    }
-    return this._oldestCreep
+    return this.cache.remember('oldestCreep', function(self){
+      return _.min(self.creeps(), (c) => c.ticksToLive)
+    }, [this])
   }
 
   structures() {
-    if (!this._structures) {
-      this._structures = this.room.find(FIND_STRUCTURES);
-    }
-    if (!this.memory().structures || this.memory().structures.length != this._structures.length) {
-      this.memory().structures = _.map(this._structures, `id`)
-    }
+    var structures = this.cache.remember('structures', function(self){
+      return self.room.find(FIND_STRUCTURES, { filter: (s) => s.isActive() })
+    }, [this])
 
-    return this._structures
+    return structures
   }
 
   spawns() {
-    if (!this._spawns) {
-      this._spawns = this.room.find(FIND_MY_SPAWNS)
-    }
-    if (!this.memory().spawns || this.memory().spawns.length != this._spawns.length) {
-      this.memory().spawns = _.map(this._spawns, 'id')
-    }
-
-    return this._spawns
+    return this.cache.remember('spawns', function(self){
+      return self.room.find(FIND_MY_SPAWNS)
+    }, [this]);
   }
 
   energyHogs() {
-    if (!this._energyHogs) {
-      this._energyHogs = _.filter(this.structures(), (structure) => {
-        return (structure.structureType == STRUCTURE_EXTENSION ||
-            structure.structureType == STRUCTURE_SPAWN ||
-            structure.structureType == STRUCTURE_TOWER) && structure.energy < structure.energyCapacity;
-        });
-    }
-
-    return this._energyHogs
+    return this.cache.remember('energyHogs', function(self){
+      return _.filter(self.structures(), (structure) => {
+        return structure.needsEnergy()
+      });
+    }, [this]);
   }
 
   constructionSites() {
-    if (!this._constructionSites) {
-      this._constructionSites = this.room.find(FIND_MY_CONSTRUCTION_SITES);
-    }
-
-    return this._constructionSites
+    return this.cache.remember('constructionSites', function(self){
+      return self.room.find(FIND_MY_CONSTRUCTION_SITES)
+    }, [this]);
   }
 
   sources() {
-    if (!this._sources) {
-      this._sources = []
-      if (this.memory().sources) {
-        for (var i in this.memory().sources) {
-          this._sources.push(Game.getObjectById(this.memory().sources[i]))
+    return this.cache.remember('sources', function(self){
+      var sources = []
+      if (self.memory().sources) {
+        for (var i in self.memory().sources) {
+          sources.push(Game.getObjectById(self.memory().sources[i]))
         }
       } else {
-        this._sources = this.room.find(FIND_SOURCES)
+        sources = self.room.find(FIND_SOURCES)
+        this.memory().sources = _.map(sources, 'id')
       }
-    }
-    if (!this.memory().sources) {
-      this.memory().sources = _.map(this._sources, 'id')
-    }
-    return this._sources
+      return sources
+    }, [this]);
   }
 
   extensions() {
-    if (!this._extensions) {
-      this._extensions = _.filter(this.structures(),
-        (s) => s.structureType == STRUCTURE_EXTENSION )
-    }
-    return this._extensions
+    return this.cache.remember('extensions', function(self){
+      return _.filter(self.structures(), (s) => s.isExtension() )
+    }, [this]);
   }
 
   containers() {
-    if (!this._containers) {
-      this._containers = _.filter(this.structures(),
-        (s) => s.structureType == STRUCTURE_CONTAINER )
-    }
-    return this._containers
+    return this.cache.remember('containers', function(self){
+      return _.filter(self.structures(), (s) => s.isContainer() )
+    }, [this]);
   }
 
   sourceContainers() {
-    if (!this._sourceContainers) {
-      this._sourceContainers = _.map(this.sources(), (s) => s.container() )
-    }
-    return this._sourceContainers
+    return this.cache.remember('sourceContainers', function(sources){
+      return _.filter(_.map(sources, (s) => s.container()), (c) => c.exists())
+    }, [this.sources()]);
   }
 
   openContainers() {
-    if (!this._openContainers) {
-      this._openContainers = this.containers().filter((c) => !this.sourceContainers().includes(c))
-    }
-    return this._openContainers
+    return this.cache.remember('openContainers', function(containers, sContainers){
+      return containers.filter((c) => !sContainers.includes(c))
+    }, [this.containers(), this.sourceContainers()]);
+  }
+
+  barriers() {
+    return this.cache.remember('barriers', function(structures){
+      return structures.filter((s) => s.isBarrier())
+    }, [this.structures()])
+  }
+
+  energyAvailableForSpawning() {
+    return this.cache.remember('spawnEnergy', function(self){
+      return _.sum(self.spawns(), 'energy') +
+        _.sum(self.extensions(), 'energy') +
+        _.sum(self.sourceContainers(), (c) => c.store.energy)
+    }, [this]);
+  }
+
+  towers() {
+    return this.cache.remember('towers', function(self){
+      return _.filter(self.structures(), (s) => s.isTower() )
+    }, [this]);
   }
 
   repairNeededStructures(percent = 0.8) {
-    if (!this._repairNeeded) {
-      this._repairNeeded = _.filter(this.structures(),
+    return this.cache.remember(`repairNeeded_${percent}`, function(self, percent){
+      return _.filter(self.structures(),
         (s) => !s.isBarrier() && s.repairNeeded(percent))
-    }
-    return this._repairNeeded
+    }, [this, percent])
   }
 
   repairNeededBarriers(percent = 0.8) {
-    var barriers
-    if (!this._repairBarriers) {
-      barriers = _.filter(this.structures(), (s) => s.isBarrier())
+    return this.cache.remember(`repairBarriers_${percent}`, function(barriers, percent){
       if (barriers.length == 0) {
-        return this._repairBarriers = []
+        return []
       }
 
       var avg =  _.sum(barriers, 'hits') / barriers.length
-      this._repairBarriers = _.filter(this.structures(),
-        (s) => s.repairNeeded(percent) && (s.hits < avg + 5000 || s.hits < 200000) )
-    }
-    return this._repairBarriers
+      return _.filter(barriers, function(s) {
+        return s.repairNeeded(percent) && (s.hits < avg + 4000 )
+        });
+    }, [this.barriers(), percent])
   }
 
   droppedEnergy() {
-    if (!this._droppedEnergy) {
-      this._droppedEnergy = _.sortBy(this.room.find(FIND_DROPPED_RESOURCES, { filter: { resourceType: RESOURCE_ENERGY }}), 'amount')
-    }
-    return this._droppedEnergy
+    return this.cache.remember('droppedEnergy', function(self){
+      return _.sortBy(self.room.find(FIND_DROPPED_RESOURCES, { filter: { resourceType: RESOURCE_ENERGY }}), 'amount')
+    }, [this]);
+  }
+
+  isEconomyWorking() {
+    return this.cache.remember('economyWorking', function(self){
+      var harvesters = self.creepsByRole()['harvester'].length
+      var couriers = self.creepsByRole()['courier'].length
+      var sources = self.sources().length
+      var containers = self.sourceContainers().length
+      if (sources > 0 && harvesters > 0 && couriers > 0 && containers > 0 ) {
+        return true
+      }
+      return false
+    }, [this])
+  }
+
+  energyProduction() {
+    return this.cache.remember('energyProduction', function(harvesters){
+      var capacity = _.sum(harvesters, (h) => h.numParts(WORK))
+      return capacity * 2
+    }, [this.creepsByRole()['harvester']])
+  }
+
+  creeps() {
+    return this.cache.remember('creeps', function(room){
+      return room.find(FIND_MY_CREEPS)
+    }, [this.room])
   }
 
   creepsByRole() {
-    if (!this._creepsByRole) {
-      this._creepsByRole = {
+    return this.cache.remember('creepsByRole', function(creeps) {
+      var collection = {
         harvester: [],
         builder: [],
         courier: [],
         upgrader: [],
-        defender: [],
-        handybot: []
+        defender: []
       }
-      var creeps = this.creeps()
       for (var i in creeps) {
-        this._creepsByRole[creeps[i].memory.role].push(creeps[i])
+        collection[creeps[i].memory.role].push(creeps[i])
       }
-    }
-    return this._creepsByRole
+      return collection
+    }, [this.creeps()])
   }
 
-  creeps() {
-    if (!this._creeps) {
-      this._creeps = this.room.find(FIND_MY_CREEPS)
-    }
-    return this._creeps
+  enemies() {
+    return this.cache.remember('enemies', function(room){
+      return room.find(FIND_CREEPS, { filter: { my: false }})
+    }, [this.room])
   }
 }
 

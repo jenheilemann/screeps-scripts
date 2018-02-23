@@ -6,24 +6,25 @@ class Courier extends GenericCreep {
   }
 
   static orderParts(roomManager, memory) {
-    var extensions = roomManager.extensions().length
+    var extensions = Math.floor(roomManager.extensions().length/2)
+    var spawns = roomManager.spawns().length
 
     // TOUGH          10
     // MOVE           50
     // CARRY          50
     // WORK           100
 
-    var totalCapacity = 300 + extensions * 50
-    var count = Math.floor(totalCapacity/150)
+    var totalCapacity = spawns*300 + extensions*50
+    var numBlock = _.min([Math.floor(totalCapacity/150), 16])
 
     if (roomManager.creepsByRole()['courier'].length === 0) {
       // force two sets of parts because we can only be guaranteed 300 energy.
-      count = 2
+      numBlock = 2
     }
 
     var partsBlock = [CARRY, CARRY, MOVE]
     var parts = []
-    for (var i = count - 1; i >= 0; i--) {
+    for (var i = numBlock - 1; i >= 0; i--) {
       parts = parts.concat(partsBlock)
     }
 
@@ -40,7 +41,12 @@ class Courier extends GenericCreep {
 
     if(this.memory.collect) {
       this.memory.parking = false
-      if (this.collect() !== false) {
+      this.memory.addressee = null
+      var dropped = _.first(this.roomManager.droppedEnergy())
+      if (dropped && dropped.amount > this.container.store.energy) {
+        return this.gatherDropped()
+      }
+      if (this.collectAny() !== false) {
         return
       }
       return this.gatherDropped()
@@ -50,6 +56,9 @@ class Courier extends GenericCreep {
       return
     }
     if (this.refillOpenContainers() !== false ) {
+      return
+    }
+    if (this.refillTowers() !== false ) {
       return
     }
 

@@ -123,6 +123,23 @@ class Generic {
     return this.creep.withdraw(container, RESOURCE_ENERGY)
   }
 
+  collectAny() {
+    var container = this.container
+    var trunkSpace = this.creep.carryCapacity - _.sum(this.creep.carry)
+
+    if (!container || container.store.energy < 50) {
+      container = _.max(this.roomManager.containers(), (c) => container.store.energy)
+      if (!container || container.store.energy < 50) {
+        return false
+      }
+    }
+
+    if (!this.creep.pos.isNearTo(container)) {
+      return this.creep.moveTo(container,{visualizePathStyle: STYLE['collect']})
+    }
+    return this.creep.withdraw(container, RESOURCE_ENERGY)
+  }
+
   gatherDropped() {
     var energy = this.roomManager.droppedEnergy()
 
@@ -177,12 +194,21 @@ class Generic {
     return this.transferOrMoveTo(containers[0])
   }
 
-  transferOrMoveTo(target){
+  refillTowers() {
+    var towers = this.roomManager.towers().filter((t) => !t.isFull())
+
+    if (towers.length === 0) {
+      return false
+    }
+    return this.transferOrMoveTo(_.min(towers, 'energy'))
+  }
+
+  transferOrMoveTo(target, resource = RESOURCE_ENERGY){
     this.memory.parking = false
     if( !this.creep.pos.isNearTo(target) ) {
-      this.creep.moveTo(target, { reusePath: 10, visualizePathStyle: STYLE['courier']});
+      return this.creep.moveTo(target, { reusePath: 10, visualizePathStyle: STYLE['courier']});
     }
-    return this.creep.transfer(target, RESOURCE_ENERGY)
+    return this.creep.transfer(target, resource)
   }
 
   upgrade() {
@@ -200,7 +226,21 @@ class Generic {
 
   repair() {
     var structures, repairable
-    if (!this.memory.repairable || Game.time - this.memory.repairStarted > 120 ) {
+
+    if (this.memory.repariable && Game.time - this.memory.repairStarted < 120) {
+      repairable = Game.getObjectById(this.memory.repairable)
+      // something got destroyed, probably
+      if (!repairable) {
+        delete this.memory.repairable
+      }
+      // it doesn't need repairing any more
+      if (repairable.hits/repairable.hitsMax > 0.98) {
+        repairable = null
+        delete this.memory.repairable
+      }
+    }
+
+    if (!repairable) {
       structures = this.roomManager.repairNeededStructures(0.95).concat(
                    this.roomManager.repairNeededBarriers())
 
@@ -209,26 +249,22 @@ class Generic {
         return false
       }
 
-      repairable = _.shuffle(structures)[0]
+      repairable = _.min(structures, (s) => s.hits/s.hitsMax + Math.random()*0.001)
       this.memory.repairable = repairable.id
       this.memory.repairStarted = Game.time
-    } else {
-      repairable = Game.getObjectById(this.memory.repairable)
-      // something got destroyed, probably
-      if (!repairable) {
-        delete this.memory.repairable
-        return false
-      }
-      // it doesn't need repairing any more
-      if (repairable.hits/repairable.hitsMax > 0.98) {
-        delete this.memory.repairable
-        return false
-      }
     }
+
     if(repairable) {
       this.memory.parking = false
       if(this.creep.pos.inRangeTo(repairable, 3)) {
         this.creep.repair(repairable)
+        if (repairable.isBarrier() && repairable.hits > 300) {
+          var barriers = this.roomManager.repairNeededBarriers()
+          if (barriers.some((b) => b.hits < 300)) {
+            // move on to another one that needs fixed NAOW
+            delete this.memory.repairable
+          }
+        }
       } else {
         this.creep.moveTo(repairable, {visualizePathStyle: STYLE['repair']});
       }
@@ -237,19 +273,32 @@ class Generic {
     return false
   }
 
+  repairRottingRamparts() {
+    var rotting = _.filter(this.roomManager.repairNeededBarriers(),
+      (s) => s.isRampart() && s.hits < 600)
+
+    if (rotting.length == 0) {
+      return false
+    }
+
+    if (!_.map(rotting, 'id').includes(this.memory.repairable)) {
+      this.memory.repairable = _.min(rotting, (r) => r.hits + Math.random())
+      this.memory.repairStarted = Game.time
+    }
+    return this.repair()
+  }
+
   moveOffRoad() {
     var parkingSpot
     if (!this.memory.parking) {
       parkingSpot = this.findParkingSpot()
       if (typeof(parkingSpot) == 'object' ) {
-        if (this.creep.moveTo(parkingSpot) === OK) {
-          this.memory.parking = true
-        }
+        this.creep.moveTo(parkingSpot)
       } else {
         this.memory.parking = false
         this.creep.move(_.shuffle([LEFT, TOP_LEFT, TOP, TOP_RIGHT, RIGHT, BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT])[0])
+        return this.creep.say('???')
       }
-      return this.creep.say('???')
     }
     this.creep.say(`🚬`)
   }
@@ -258,6 +307,7 @@ class Generic {
     var pos = this.creep.pos
     var current = this.creep.room.lookAt(pos)
     if (this._locationIsParkingAppropriate(current)) {
+      this.memory.parking = true
         return pos;
     }
 
@@ -277,7 +327,7 @@ class Generic {
       if (data[i].type === 'creep' && data[i].creep.id !== this.creep.id) {
         return false
       }
-      if (data[i].type === 'structure') {
+      if (data[i].type === 'structure' && data[i].structure.structureType !== STRUCTURE_RAMPART) {
         return false
       }
       if (data[i].type === 'terrain' && data[i].terrain === 'wall'){

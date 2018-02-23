@@ -1,15 +1,11 @@
 'use strict'
-const WORKER_ROLES = ['builder', 'upgrader', 'handybot']
+const WORKER_ROLES = ['builder', 'upgrader']
 
 class Worker extends GenericCreep {
   static initializeMemory(roomManager) {
-    var source_id = this._findSourceWithOpenSpot(roomManager)
-    var container_id = this._findContainerWithOpenSpot(source_id, roomManager)
-    return {
-      role: this.role(),
-      source: source_id,
-      container: container_id
-    }
+    var base = super.initializeMemory(roomManager)
+    base.container = this._findContainerWithOpenSpot(base.source, roomManager)
+    return base
   }
 
   static comparisonRoles() {
@@ -38,47 +34,24 @@ class Worker extends GenericCreep {
   }
 
   static orderParts(roomManager, memory) {
-    var extensions = roomManager.extensions().length
+    var extensions = Math.floor(roomManager.extensions().length/3)
+    var spawns = roomManager.spawns().length
 
     // TOUGH          10
     // MOVE           50
     // CARRY          50
     // WORK           100
 
-    switch(true) {
-      case extensions == 0:
-        return [WORK, CARRY, MOVE]
-        break;
-      case extensions == 1:
-        return [WORK, CARRY, CARRY, CARRY, MOVE, MOVE]
-        break;
-      case extensions <= 3:
-        return [WORK, WORK, CARRY, CARRY, MOVE, MOVE]
-        break;
-      case extensions <= 5:
-        return [WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE]
-        break;
-      case extensions <= 9:
-        return [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE]
-        break;
-      case extensions <= 13:
-        return [
-          WORK,  WORK,  WORK,  WORK,
-          CARRY, CARRY, CARRY, CARRY,
-          MOVE,  MOVE,  MOVE,  MOVE]
-        break;
-      case extensions <= 17:
-        return [
-          WORK,  WORK,  WORK,  WORK,  WORK,
-          CARRY, CARRY, CARRY, CARRY, CARRY,
-          MOVE,  MOVE,  MOVE,  MOVE,  MOVE]
-        break;
-      default:
-        return [
-          WORK,  WORK,  WORK,  WORK,  WORK,  WORK,
-          CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
-          MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE]
+    var totalCapacity = spawns*300 + extensions*50
+    var numBlocks = _.min([Math.floor(totalCapacity/200), 16])
+    var partsBlock = [WORK, CARRY, MOVE]
+    var parts = []
+
+    for (var i = numBlocks - 1; i >= 0; i--) {
+      parts = parts.concat(partsBlock)
     }
+
+    return parts
   }
 }
 

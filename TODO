@@ -1,4 +1,8 @@
+Bugs:
+ ☐ spawning a creep doesn't count toward creep totals and can cause double spawns of the same creep
+ ☐ smoke break still messes up sometimes
 
+Things:
  ✔ trigger room census after creep death @done (18-02-19 22:39)
  ☐ figure out graphana stats
  ☐ scout other rooms

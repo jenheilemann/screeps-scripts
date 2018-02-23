@@ -4,7 +4,7 @@ Source.prototype.container = function () {
   var container, containers
   this.initializeMemory();
 
-  if (typeof(this.memory.container) != 'string' && Game.time - this.memory.containerSearch > 53) {
+  if (typeof(this.memory.container) != 'string' && Game.time - this.memory.containerSearch > 17) {
     this.memory.containerSearch = Game.time
     containers = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_CONTAINER}})
     for (var i in containers) {

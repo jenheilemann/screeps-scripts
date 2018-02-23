@@ -17,8 +17,11 @@ class Upgrader extends WorkerCreep {
     if(this.memory.upgrading) {
       return this.upgrade()
     }
-    if (this.collect() === false) {
-      this.harvest()
+
+    if (this.collect() === false ) {
+      if (!this.roomManager.isEconomyWorking() ) {
+        return this.harvest()
+      }
     }
   }
 
