@@ -62,6 +62,7 @@ class Builder extends WorkerCreep {
       if (this.repair(this.roomManager.repairNeededBarriers()) !== false) {
         return
       }
+      return this.moveOffRoad()
     }
 
     if (this.collect() === false ) {

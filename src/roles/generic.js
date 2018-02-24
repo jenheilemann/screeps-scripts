@@ -316,7 +316,10 @@ class Generic {
     const PopulationManager = require('managers_population')
     var manager = new PopulationManager(this.roomManager)
     var goal = manager.goalByRole(this.constructor.role())
-    var current = (this.roomManager.creepsByRole(this.constructor.role()) || []).length
+    var current = (this.roomManager.creepsByRole(this.constructor.role())).length
+    if (goal < current) {
+      return false
+    }
     return this.creep.body.length >= newParts
   }
 
