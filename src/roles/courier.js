@@ -17,7 +17,7 @@ class Courier extends GenericCreep {
     var totalCapacity = spawns*300 + extensions*50
     var numBlock = _.min([Math.floor(totalCapacity/150), 16])
 
-    if (roomManager.creepsByRole()['courier'].length === 0) {
+    if (roomManager.creepsByRole('courier').length === 0) {
       // force two sets of parts because we can only be guaranteed 300 energy.
       numBlock = 2
     }
@@ -32,7 +32,6 @@ class Courier extends GenericCreep {
   }
 
   makeDecisions() {
-
     if (this.renewOrRecycle(this.roomManager.spawns()[0]) !== false) {
       return
     }
@@ -57,13 +56,21 @@ class Courier extends GenericCreep {
       return this.gatherDropped()
     }
 
+    // prioritize towers in emergencies!
+    if (this.roomManager.defcon().level > 0 && this.refillTowers(1) !== false ) {
+      return
+    }
+
     if (this.refillSpawns() !== false){
+      return
+    }
+    if (this.refillTowers(0.25) !== false ) {
       return
     }
     if (this.refillOpenContainers() !== false ) {
       return
     }
-    if (this.refillTowers() !== false ) {
+    if (this.refillTowers(1) !== false ) {
       return
     }
     if (this.refillStorage() !== false ) {

@@ -7,8 +7,8 @@ class PopulationManager {
   }
 
   neededRole() {
+    var self = this
     var rm = this.roomManager
-    var creepsByRole = rm.creepsByRole()
     var numExtensions = rm.extensions().length
     var total
 
@@ -17,8 +17,8 @@ class PopulationManager {
         return false
       }
 
-      total = (creepsByRole[role] || []).length
-      if ( total >= DISTRIBUTION[role].goal(rm) ) {
+      total = rm.creepsByRole(role).length
+      if ( total >= self.goalByRole(role) ) {
         return false
       }
       if (total >= DISTRIBUTION[role].max ) {
@@ -37,6 +37,10 @@ class PopulationManager {
 
     return max
   }
+
+  goalByRole(role) {
+    return DISTRIBUTION[role].goal(this.roomManager)
+  }
 }
 
 // Distribution calculations per creep role.
@@ -44,7 +48,7 @@ class PopulationManager {
 const DISTRIBUTION = {
   harvester: {
     goal: function(rm){
-      var couriers = rm.creepsByRole()['courier']
+      var couriers = rm.creepsByRole('courier')
       if (couriers.length == 0) {
         return 2 * rm.sources().length
       }
@@ -53,7 +57,7 @@ const DISTRIBUTION = {
     max: 6,
     minExtensions: 0,
     priority: function(rm) {
-      var harvesters = rm.creepsByRole()['harvester']
+      var harvesters = rm.creepsByRole('harvester')
       if (harvesters.length == 0) {
         return 150
       }
@@ -67,7 +71,7 @@ const DISTRIBUTION = {
     max: 10,
     minExtensions: 0,
     priority: function(rm) {
-      var couriers = rm.creepsByRole()['courier']
+      var couriers = rm.creepsByRole('courier')
       if (couriers.length == 0) {
         return 140
       }
@@ -82,7 +86,7 @@ const DISTRIBUTION = {
     max: 2,
     minExtensions: 0,
     priority: function(rm) {
-      var builders = rm.creepsByRole()['builder']
+      var builders = rm.creepsByRole('builder')
       if (builders.length == 0) {
         return 50
       }
@@ -91,20 +95,16 @@ const DISTRIBUTION = {
   },
   upgrader:  {
     goal: function(rm) {
-      if (rm.controllerLevel() == 0) {
-        return 0
-      }
-
-      if (rm.controllerLevel() == 8) {
-        return 1
-      }
+      if (rm.defcon().level > 0)     { return 0 }
+      if (rm.controllerLevel() == 0) { return 0 }
+      if (rm.controllerLevel() == 8) { return 1 }
 
       var energyPerTick = rm.energyProduction()
       var Upgrader = require('roles_upgrader')
       var parts = Upgrader.orderParts(rm, {})
       // essentially _.filter(p, p == WORK).length
       var numWorkParts = _.sum(parts, (p) => p === WORK ? 1 : 0)
-      var numBuilders = rm.creepsByRole()['builder'].length
+      var numBuilders = rm.creepsByRole('builder').length
       var numUpgraders = Math.floor(energyPerTick/numWorkParts) - numBuilders
 
       return _.max([1, numUpgraders])
@@ -112,7 +112,7 @@ const DISTRIBUTION = {
     max: 5,
     minExtensions: 0,
     priority: function(rm) {
-      var upgraders = rm.creepsByRole()['upgrader']
+      var upgraders = rm.creepsByRole('upgrader')
       if (upgraders.length == 0) {
         return 60
       }
@@ -121,7 +121,8 @@ const DISTRIBUTION = {
   },
   defender:  {
     goal: function(rm) {
-      return rm.defconLevel()
+      return 0
+      return (rm.defcon().level-1) * 2
     },
     max: 6,
     minExtensions: 3,

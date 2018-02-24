@@ -1,0 +1,1 @@
+global.CREEP_LIFETIME = 1500

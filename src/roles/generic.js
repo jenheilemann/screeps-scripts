@@ -80,8 +80,9 @@ class Generic {
   }
 
   placeRoadConstructions() {
-    var constructionSites = this.roomManager.constructionSites();
-    if (constructionSites.length < 6) {
+    var constructionSites = this.roomManager.constructionSites()
+    var towers = this.roomManager.towers()
+    if (constructionSites.length < 6 && towers.length > 1) {
       this.creep.room.createConstructionSite(this.creep, STRUCTURE_ROAD)
     }
   }
@@ -196,8 +197,8 @@ class Generic {
     return this.transferOrMoveTo(containers[0])
   }
 
-  refillTowers() {
-    var towers = this.roomManager.towers().filter((t) => !t.isFull())
+  refillTowers(percent) {
+    var towers = this.roomManager.towers().filter((t) => t.energy/t.energyCapacity < percent)
 
     if (towers.length === 0) {
       return false
@@ -243,6 +244,17 @@ class Generic {
   repair(structures) {
     var repairable
 
+    // No repairable structures found
+    if (structures.length == 0) {
+      return false
+    }
+
+    // towers can handle it
+    var towers = this.roomManager.towers()
+    if (towers.length > 0 && _.sum(towers, 'energy') > 100 ) {
+      return false
+    }
+
     if (this.memory.repairable && Game.time - this.memory.repairStarted < 25) {
       repairable = Game.getObjectById(this.memory.repairable)
       // something got destroyed, probably
@@ -250,20 +262,16 @@ class Generic {
         delete this.memory.repairable
       }
       // it doesn't need repairing any more
-      if (repairable.hits/repairable.hitsMax > 0.98) {
+      if (repairable.hits/repairable.hitsMax > 0.98 ||
+        !structures.includes(repairable)) {
         repairable = null
         delete this.memory.repairable
       }
     }
 
     if (!repairable) {
-      // No repairable structures found
-      if (structures.length == 0) {
-        return false
-      }
-
       repairable = _.min(structures,
-        (s) => Math.floor(s.hits/s.hitsMax * 10) + Math.random()*0.01
+        (s) => Math.floor(s.hits/s.hitsMax * 15) + Math.random()*0.01
       );
       this.memory.repairable = repairable.id
     }
@@ -290,42 +298,30 @@ class Generic {
     }
 
     if (this.memory.renewing) {
+      if (!this.creep.pos.inRangeTo(spawn, 1)) {
+        return this.creep.moveTo(spawn, {visualizePathStyle: STYLE['renew']})
+      }
       if (this.worthRenewing()) {
-        return this.renew(spawn)
+        this.creep.say('🛌💤💤') // person in bed
+        return spawn.renewCreep(this.creep)
       } else {
-        return this.recycle(spawn)
+        return spawn.recycleCreep(this.creep)
       }
     }
     return false
   }
 
-  renew(spawn) {
-    if (this.creep.pos.inRangeTo(spawn, 1)) {
-      this.creep.transfer(spawn, RESOURCE_ENERGY)
-      this.creep.say('🛌💤💤') // person in bed
-      return spawn.renewCreep(this.creep)
-    }
-    return this.creep.moveTo(spawn, {visualizePathStyle: STYLE['renew']})
-  }
-
   worthRenewing() {
-    return this.creep.body.length >= this.constructor.orderParts(this.roomManager, {}).length
+    var newParts = this.constructor.orderParts(this.roomManager, {}).length
+    const PopulationManager = require('managers_population')
+    var manager = new PopulationManager(this.roomManager)
+    var goal = manager.goalByRole(this.constructor.role())
+    var current = (this.roomManager.creepsByRole(this.constructor.role()) || []).length
+    return this.creep.body.length >= newParts
   }
 
   ticksPerRenewal() {
     return Math.floor(600/this.creep.body.length)
-  }
-
-  recycle(spawn) {
-    if (this.creep.pos.inRangeTo(spawn, 2)) {
-      this.creep.transfer(spawn, RESOURCE_ENERGY)
-      this.creep.say('👋💔♻️') // goodbye, cruel world
-    }
-    if (this.creep.pos.inRangeTo(spawn, 1)) {
-      this.creep.transfer(spawn, RESOURCE_ENERGY)
-      return spawn.recycleCreep(this.creep)
-    }
-    return this.creep.moveTo(spawn, {visualizePathStyle: STYLE['recycle']})
   }
 
   moveOffRoad() {

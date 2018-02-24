@@ -6,15 +6,17 @@ class Builder extends WorkerCreep {
   }
 
   static goalPopulation(roomManager) {
-    var sites, progress, total, remaining
-    sites = roomManager.constructionSites()
+    if (roomManager.defcon().level > 0) {
+      return 0
+    }
+    var sites = roomManager.constructionSites()
 
     if (sites.length == 0) {
       return this.repairGoalPopulation(roomManager)
     }
-    progress = _.sum(_.map(sites, 'progress'))
-    total = _.sum(_.map(sites, 'progressTotal'))
-    remaining = total - progress
+    var progress = _.sum(_.map(sites, 'progress'))
+    var total = _.sum(_.map(sites, 'progressTotal'))
+    var remaining = total - progress
 
     if (remaining <= 15000) {
       return 1
@@ -23,6 +25,11 @@ class Builder extends WorkerCreep {
   }
 
   static repairGoalPopulation(roomManager) {
+    var towers = roomManager.towers().length
+    if (towers > 0) {
+      return 0
+    }
+
     // includes roads!
     var structures = roomManager.repairNeededStructures().length +
                      roomManager.repairNeededBarriers().length
@@ -34,15 +41,15 @@ class Builder extends WorkerCreep {
       return
     }
 
-    if(this.creep.memory.building && this.creep.carry.energy == 0) {
-      this.creep.memory.reparable = null
-      this.creep.memory.building = false
+    if(this.memory.building && this.creep.carry.energy == 0) {
+      this.memory.reparable = null
+      this.memory.building = false
     }
-    if(!this.creep.memory.building && this.creep.carry.energy == this.creep.carryCapacity) {
-      this.creep.memory.building = true
+    if(!this.memory.building && this.creep.isFull()) {
+      this.memory.building = true
     }
 
-    if(this.creep.memory.building) {
+    if(this.memory.building) {
       if (this.repair(this.roomManager.rottingRamparts()) !== false) {
         return
       }
@@ -55,15 +62,14 @@ class Builder extends WorkerCreep {
       if (this.repair(this.roomManager.repairNeededBarriers()) !== false) {
         return
       }
-      this.moveOffRoad()
     }
 
     if (this.collect() === false ) {
       if (!this.roomManager.isEconomyWorking() ) {
         return this.harvest()
       }
-      this.moveOffRoad()
     }
+    this.moveOffRoad()
   }
 
 }

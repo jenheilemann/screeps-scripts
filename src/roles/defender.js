@@ -23,10 +23,10 @@ class Defender {
 
     switch(true) {
       case extensions <= 5:
-        return [TOUGH, TOUGH, RANGED_ATTACK, MOVE, MOVE]
+        return [TOUGH, MOVE, MOVE, RANGED_ATTACK]
         break;
       case extensions <= 10:
-        return [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH,
+        return [TOUGH, TOUGH,
           MOVE, MOVE, MOVE, MOVE,
           RANGED_ATTACK, RANGED_ATTACK]
         break;

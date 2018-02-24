@@ -7,7 +7,8 @@ class Harvester extends GenericCreep {
 
   static orderParts(roomManager, memory) {
     var extensions = roomManager.extensions().length
-    var creeps = roomManager.creepsByRole()
+    var numCouriers = roomManager.creepsByRole('courier').length
+    var numHarvesters = roomManager.creepsByRole('harvester').length
     var container = !!memory.container
     var availableEnergy = roomManager.energyAvailableForSpawning()
 
@@ -17,26 +18,26 @@ class Harvester extends GenericCreep {
     // WORK           100
 
     switch(true) {
-      case creeps['courier'].length === 0:
+      case numCouriers === 0:
       case !container:
         return [WORK, CARRY, MOVE]
 
       case extensions == 0:
         return [WORK, WORK, MOVE]
 
-      case creeps['harvester'].length === 0 && availableEnergy < 450:
+      case numHarvesters === 0 && availableEnergy < 450:
       case extensions <= 2:
         return [WORK, WORK, WORK, MOVE]
 
-      case creeps['harvester'].length === 0 && availableEnergy < 550:
+      case numHarvesters === 0 && availableEnergy < 550:
       case extensions <= 4:
         return [WORK, WORK, WORK, WORK, MOVE]
 
-      case creeps['harvester'].length === 0 && availableEnergy < 650:
+      case numHarvesters === 0 && availableEnergy < 650:
       case extensions <= 6:
         return [WORK, WORK, WORK, WORK, WORK, MOVE]
 
-      case creeps['harvester'].length === 0:
+      case numHarvesters === 0:
       default:
         return [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE]
     }
@@ -61,8 +62,8 @@ class Harvester extends GenericCreep {
     }
 
     if(this.creep.memory.harvesting) {
-      var creeps = this.roomManager.creepsByRole()
-      var overContainer = creeps['courier'].length > 0
+      var numCouriers = this.roomManager.creepsByRole('courier').length
+      var overContainer = numCouriers > 0
       return this.harvest(overContainer)
     }
 

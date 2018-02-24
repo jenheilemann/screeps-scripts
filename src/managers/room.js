@@ -13,12 +13,14 @@ class RoomManager {
     if (!this.room.memory) {
       this.room.memory = {}
     }
+    this.memory = this.room.memory
   }
 
   run() {
     this.spawnCreeps()
     new CreepManager(this).run()
     new TowerManager(this).run()
+    this.activateSafeMode()
   }
 
   spawnCreeps() {
@@ -26,38 +28,82 @@ class RoomManager {
       return
     }
 
-    if (!this.memory().censusTaken ) {
-      this.memory().censusTaken = 0
+    if (!this.memory.censusTaken ) {
+      this.memory.censusTaken = 0
     }
 
     if (this.spawns()[0].spawning != null) {
       return
     }
 
-    if (Game.time - this.memory().censusTaken >= 59) {
+    if (Game.time - this.memory.censusTaken >= 59) {
       const PopulationManager = require('managers_population')
       var population = new PopulationManager(this)
       console.log(`Running census for room ${this.room.name}`)
-      this.memory().nextCreep = population.neededRole()
-      this.memory().censusTaken = Game.time
+      this.memory.nextCreep = population.neededRole()
+      this.memory.censusTaken = Game.time
     }
 
-    if (!this.memory().nextCreep) {
+    if (!this.memory.nextCreep) {
       return
     }
 
-    var factory = new CreepFactory(this, this.memory().nextCreep, this.spawns()[0])
+    var factory = new CreepFactory(this, this.memory.nextCreep, this.spawns()[0])
     if ( factory.buildCreep() ) {
-      this.memory().nextCreep = false
+      this.memory.nextCreep = false
     }
   }
 
-  memory() {
-    return this.room.memory
+  activateSafeMode() {
+    var defcon = this.defcon()
+    if (defcon.level == 0) {
+      return
+    }
+
+    if (defcon.level > 0) {
+      var result = OK
+      if ( defcon.timer > 50) {
+        console.log('activating safemode, defcon timer too big')
+        // result = this.room.controller.activateSafeMode()
+      }
+      if ( this.structureWasDestroyed() ) {
+        console.log('activating safemode, structure destroyed')
+        // result = this.room.controller.activateSafeMode()
+      }
+      // if (result == OK) {
+      //   this.cache.remember('defcon', (d) => d.reset(), [defcon])
+      // }
+    }
+
   }
 
-  defconLevel() {
-    return 0 // TODO https://arcath.net/2016/12/screeps-part-8-constructors-defcon/
+  safeModeActive() {
+    return this.cache.remember('safeModeActive', function(self) {
+      return typeof(self.room.controller.safeMode) === 'number'
+    }, [this])
+  }
+
+  structureWasDestroyed() {
+    this.cache.remember('structureDestroyed', function(self) {
+      var structures = self.structures()
+
+      self.memory.previousStructureCount = self.memory.structureCount
+      self.memory.structureCount = structures.length
+
+      if (typeof(self.memory.previousStructureCount) === 'number' &&
+        structures.length < self.memory.previousStructureCount) {
+        return false
+      }
+      return true
+    }, [this])
+
+  }
+
+  defcon() {
+    return this.cache.remember('defcon', function(self) {
+      const DefconCalculator = require('lib_defcon_calculator')
+      return new DefconCalculator(self).level()
+    }, [this])
   }
 
   controllerLevel() {
@@ -83,15 +129,15 @@ class RoomManager {
     }, [this])
   }
 
-  structuresByType() {
+  structuresByType(type) {
     return this.cache.remember('structuresByType', function(structures) {
       return _.groupBy(structures, 'structureType')
-    }, [this.structures()])
+    }, [this.structures()])[type] || []
   }
 
   spawns() {
     return this.cache.remember('spawns', function(self){
-      return self.structuresByType()[STRUCTURE_SPAWN] || []
+      return self.structuresByType(STRUCTURE_SPAWN)
     }, [this]);
   }
 
@@ -112,13 +158,13 @@ class RoomManager {
   sources() {
     return this.cache.remember('sources', function(self){
       var sources = []
-      if (self.memory().sources) {
-        for (var i in self.memory().sources) {
-          sources.push(Game.getObjectById(self.memory().sources[i]))
+      if (self.memory.sources) {
+        for (var i in self.memory.sources) {
+          sources.push(Game.getObjectById(self.memory.sources[i]))
         }
       } else {
         sources = self.room.find(FIND_SOURCES)
-        this.memory().sources = _.map(sources, 'id')
+        this.memory.sources = _.map(sources, 'id')
       }
       return sources
     }, [this]);
@@ -126,13 +172,13 @@ class RoomManager {
 
   extensions() {
     return this.cache.remember('extensions', function(self){
-      return self.structuresByType()[STRUCTURE_EXTENSION] || []
+      return self.structuresByType(STRUCTURE_EXTENSION)
     }, [this]);
   }
 
   containers() {
     return this.cache.remember('containers', function(self){
-      return self.structuresByType()[STRUCTURE_CONTAINER] || []
+      return self.structuresByType(STRUCTURE_CONTAINER)
     }, [this]);
   }
 
@@ -149,9 +195,11 @@ class RoomManager {
   }
 
   barriers() {
-    return this.cache.remember('barriers', function(struct){
-      return (struct[STRUCTURE_RAMPART] || []).concat(struct[STRUCTURE_WALL] || [])
-    }, [this.structuresByType()])
+    return this.cache.remember('barriers', function(self){
+      var ramparts = self.structuresByType(STRUCTURE_RAMPART)
+      var walls = self.structuresByType(STRUCTURE_WALL)
+      return ramparts.concat(walls)
+    }, [this])
   }
 
   energyAvailableForSpawning() {
@@ -163,15 +211,15 @@ class RoomManager {
   }
 
   towers() {
-    return this.cache.remember('towers', function(struct){
-      return struct[STRUCTURE_TOWER] || []
-    }, [this.structuresByType()]);
+    return this.cache.remember('towers', function(self){
+      return self.structuresByType(STRUCTURE_TOWER)
+    }, [this]);
   }
 
   storage() {
-    return this.cache.remember('storage', function(struct) {
-      return (struct[STRUCTURE_STORAGE] || [])[0]
-    }, [this.structuresByType()])
+    return this.cache.remember('storage', function(self) {
+      return self.structuresByType(STRUCTURE_STORAGE)[0]
+    }, [this])
   }
 
   repairNeededStructures(percent = 0.8) {
@@ -213,8 +261,8 @@ class RoomManager {
 
   isEconomyWorking() {
     return this.cache.remember('economyWorking', function(self){
-      var harvesters = self.creepsByRole()['harvester'].length
-      var couriers = self.creepsByRole()['courier'].length
+      var harvesters = self.creepsByRole('harvester').length
+      var couriers = self.creepsByRole('courier').length
       var sources = self.sources().length
       var containers = self.sourceContainers().length
       if (sources > 0 && harvesters > 0 && couriers > 0 && containers > 0 ) {
@@ -228,7 +276,7 @@ class RoomManager {
     return this.cache.remember('energyProduction', function(harvesters){
       var capacity = _.sum(harvesters, (h) => h.numParts(WORK))
       return capacity * 2
-    }, [this.creepsByRole()['harvester']])
+    }, [this.creepsByRole('harvester')])
   }
 
   creeps() {
@@ -237,10 +285,11 @@ class RoomManager {
     }, [this.room])
   }
 
-  creepsByRole() {
-    return this.cache.remember('creepsByRole', function(creeps) {
+  creepsByRole(role) {
+    var creeps = this.cache.remember('creepsByRole', function(creeps) {
       return _.groupBy(creeps, (c) => c.memory.role)
     }, [this.creeps()])
+    return creeps[role] || []
   }
 
   enemies() {
