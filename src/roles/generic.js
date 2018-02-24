@@ -293,7 +293,7 @@ class Generic {
     if (this.creep.ticksToLive < 50) {
       this.memory.renewing = true
     }
-    if (CREEP_LIFETIME - this.creep.ticksToLive < this.ticksPerRenewal()) {
+    if (CREEP_LIFE_TIME - this.creep.ticksToLive < this.ticksPerRenewal()) {
       this.memory.renewing = false
     }
 
