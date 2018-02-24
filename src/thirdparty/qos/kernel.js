@@ -1,8 +1,8 @@
 'use strict'
 
-const Scheduler = require('qos_scheduler')
-const Performance = require('qos_performance')
-const Process = require('qos_process')
+const Scheduler = require('thirdparty_qos_scheduler')
+const Performance = require('thirdparty_qos_performance')
+const Process = require('thirdparty_qos_process')
 
 global.BUCKET_EMERGENCY = 1000
 global.BUCKET_FLOOR = 2000
