@@ -1,4 +1,5 @@
 'use strict'
+const WorkerCreep = require(`roles_worker`)
 
 class Upgrader extends WorkerCreep {
   static role() {

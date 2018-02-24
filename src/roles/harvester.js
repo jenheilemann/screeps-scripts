@@ -1,4 +1,5 @@
 'use strict'
+const GenericCreep = require(`roles_generic`)
 
 class Harvester extends GenericCreep {
   static role() {

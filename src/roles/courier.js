@@ -1,4 +1,5 @@
 'use strict'
+const GenericCreep = require(`roles_generic`)
 
 class Courier extends GenericCreep {
   static role() {

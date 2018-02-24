@@ -1,6 +1,7 @@
 'use strict'
+const GenericCreep = require(`roles_generic`)
 
-class Defender {
+class Defender extends GenericCreep {
   constructor(creep, roomManager) {
     this.creep = creep
     this.roomManager = roomManager

@@ -4,8 +4,6 @@ if (Game.cpu.bucket < 500) {
   return
 }
 
-global.STRUCTURE_BARRIER = [STRUCTURE_WALL, STRUCTURE_RAMPART]
-
 require('version')
 if(!Memory.SCRIPT_VERSION || Memory.SCRIPT_VERSION != SCRIPT_VERSION) {
   Memory.SCRIPT_VERSION = SCRIPT_VERSION
@@ -29,12 +27,9 @@ require(`extensions_structure_extension`)
 require(`extensions_structure_spawn`)
 require(`extensions_structure_tower`)
 require(`extensions_structure_storage`)
-global.StructureNull = require(`extensions_structure_null`)
 require(`extensions_construction_site`)
 require(`extensions_source`)
-
-global.GenericCreep = require(`roles_generic`)
-global.WorkerCreep = require(`roles_worker`)
+global.StructureNull = require(`extensions_structure_null`)
 
 global.util = require('lib_util')
 const RoomManager = require('managers_room')

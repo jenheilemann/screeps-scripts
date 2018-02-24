@@ -1,4 +1,5 @@
 'use strict'
+const GenericCreep = require(`roles_generic`)
 const WORKER_ROLES = ['builder', 'upgrader']
 
 class Worker extends GenericCreep {
