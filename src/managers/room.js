@@ -231,6 +231,9 @@ class RoomManager {
     var avg = this.cache.remember('barrierAvgHits', function(barriers){
       return _.sum(barriers, 'hits') / barriers.length
     }, [this.barriers()])
+    var max = this.cache.remember('barrierMaxHits', function(self){
+      return self.controllerLevel < 8 ? ONE_MILLION : THREE_HUNDRED_MILLION
+    }, [this])
 
     return this.cache.remember(`repairBarriers_${percent}`,
       function(barriers, percent, avg){
