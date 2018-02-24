@@ -95,7 +95,7 @@ const DISTRIBUTION = {
   },
   upgrader:  {
     goal: function(rm) {
-      if (rm.defcon().level > 0)     { return 0 }
+      if (rm.defcon.level > 0)     { return 0 }
       if (rm.controllerLevel() == 0) { return 0 }
       if (rm.controllerLevel() == 8) { return 1 }
 
@@ -122,7 +122,7 @@ const DISTRIBUTION = {
   defender:  {
     goal: function(rm) {
       return 0
-      return (rm.defcon().level-1) * 2
+      return (rm.defcon.level-1) * 2
     },
     max: 6,
     minExtensions: 3,

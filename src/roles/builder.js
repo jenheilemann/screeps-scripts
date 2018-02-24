@@ -6,7 +6,7 @@ class Builder extends WorkerCreep {
   }
 
   static goalPopulation(roomManager) {
-    if (roomManager.defcon().level > 0) {
+    if (roomManager.defcon.level > 0) {
       return 0
     }
     var sites = roomManager.constructionSites()

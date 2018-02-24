@@ -4,6 +4,7 @@ const CreepFactory = require('managers_creepfactory')
 const CreepManager = require('managers_creep')
 const TowerManager = require('managers_tower')
 const Cache = require('lib_cache')
+const DefconCalculator = require('lib_defcon_calculator')
 
 class RoomManager {
 
@@ -14,6 +15,7 @@ class RoomManager {
       this.room.memory = {}
     }
     this.memory = this.room.memory
+    this.defcon = new DefconCalculator(self).level()
   }
 
   run() {
@@ -55,14 +57,13 @@ class RoomManager {
   }
 
   activateSafeMode() {
-    var defcon = this.defcon()
-    if (defcon.level == 0) {
+    if (this.defcon.level == 0) {
       return
     }
 
-    if (defcon.level > 0) {
+    if (this.defcon.level > 0) {
       var result = OK
-      if ( defcon.timer > 50) {
+      if ( this.defcon.timer > 50) {
         console.log('activating safemode, defcon timer too big')
         // result = this.room.controller.activateSafeMode()
       }
@@ -71,7 +72,7 @@ class RoomManager {
         // result = this.room.controller.activateSafeMode()
       }
       // if (result == OK) {
-      //   this.cache.remember('defcon', (d) => d.reset(), [defcon])
+      //   this.defcon = this.defcon.reset()
       // }
     }
 
@@ -97,13 +98,6 @@ class RoomManager {
       return true
     }, [this])
 
-  }
-
-  defcon() {
-    return this.cache.remember('defcon', function(self) {
-      const DefconCalculator = require('lib_defcon_calculator')
-      return new DefconCalculator(self).level()
-    }, [this])
   }
 
   controllerLevel() {

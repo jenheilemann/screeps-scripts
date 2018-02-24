@@ -57,7 +57,7 @@ class Courier extends GenericCreep {
     }
 
     // prioritize towers in emergencies!
-    if (this.roomManager.defcon().level > 0 && this.refillTowers(1) !== false ) {
+    if (this.roomManager.defcon.level > 0 && this.refillTowers(1) !== false ) {
       return
     }
 
