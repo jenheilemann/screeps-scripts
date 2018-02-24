@@ -15,7 +15,7 @@ class RoomManager {
       this.room.memory = {}
     }
     this.memory = this.room.memory
-    this.defcon = new DefconCalculator(self).level()
+    this.defcon = new DefconCalculator(this).level()
   }
 
   run() {
