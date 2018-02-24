@@ -1,8 +1,8 @@
 'use strict'
 
-const Scheduler = require('thirdparty_qos_scheduler')
 const Performance = require('thirdparty_qos_performance')
 const Process = require('thirdparty_qos_process')
+const Scheduler = require('thirdparty_qos_scheduler')
 
 global.BUCKET_EMERGENCY = 1000
 global.BUCKET_FLOOR = 2000
@@ -19,7 +19,7 @@ const RECURRING_BURST_FREQUENCY = 25
 const GLOBAL_LAST_RESET = Game.time
 
 class QosKernel {
-  constructor () {
+  constructor (notifier) {
     global.kernel = this
 
     if (!Memory.qos) {
@@ -30,6 +30,7 @@ class QosKernel {
     this.scheduler = new Scheduler()
     this.performance = new Performance()
     this.process = Process
+    this.notifier = notifier
   }
 
   start () {
@@ -74,7 +75,7 @@ class QosKernel {
     }
 
     sos.lib.cache.clean()
-    qlib.notify.clean()
+    this.notifier.cleanHistory(10000)
   }
 
   run () {

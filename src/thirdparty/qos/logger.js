@@ -18,8 +18,9 @@ const ERROR_COLORS = {
 }
 
 class Logger {
-  constructor () {
+  constructor (notifier) {
     this.defaultLogGroup = 'default'
+    this.notifier = notifier
   }
 
   log (message, severity = 3, group = false, tags = []) {
@@ -34,7 +35,7 @@ class Logger {
     }
 
     if (severity >= LOG_ERROR) {
-      qlib.notify.send(message, 500)
+      this.notifier(message, 500)
     }
 
     if (Memory.loglevel && Memory.loglevel > severity) {
