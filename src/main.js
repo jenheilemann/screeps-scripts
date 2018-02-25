@@ -11,7 +11,7 @@ require('constants')
 const QosLogger = require('thirdparty_qos_logger')
 const Notify = require('thirdparty_notify')
 global.Logger = new QosLogger(Notify)
-const QosKernel = require('qos_kernel')
+const QosKernel = require('thirdparty_qos_kernel')
 
 /* Add "sos library" - https://github.com/ScreepsOS/sos-library */
 global.SOS_LIB_PREFIX = 'thirdparty_'
