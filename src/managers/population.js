@@ -2,14 +2,14 @@
 
 class PopulationManager {
 
-  constructor(roomManager) {
-    this.roomManager = roomManager
+  constructor(room) {
+    this.room = room
   }
 
   neededRole() {
     var self = this
-    var rm = this.roomManager
-    var numExtensions = rm.extensions().length
+    var rm = this.room
+    var numExtensions = rm.extensions.length
     var total
 
     var needed = _.filter(Object.keys(DISTRIBUTION), function(role) {
@@ -39,20 +39,20 @@ class PopulationManager {
   }
 
   goalByRole(role) {
-    return DISTRIBUTION[role].goal(this.roomManager)
+    return DISTRIBUTION[role].goal(this.room)
   }
 }
 
 // Distribution calculations per creep role.
-// Most depend on variables from the room data. (`rm` == roomManager)
+// Most depend on variables from the room data. (`rm` == room)
 const DISTRIBUTION = {
   harvester: {
     goal: function(rm){
       var couriers = rm.creepsByRole('courier')
       if (couriers.length == 0) {
-        return 2 * rm.sources().length
+        return 2 * rm.sources.length
       }
-      return 1 * rm.sources().length
+      return 1 * rm.sources.length
     },
     max: 6,
     minExtensions: 0,
@@ -66,7 +66,7 @@ const DISTRIBUTION = {
   },
   courier: {
     goal: function(rm){
-      return rm.sourceContainers().length
+      return rm.sourceContainers.length
     },
     max: 10,
     minExtensions: 0,
@@ -96,10 +96,10 @@ const DISTRIBUTION = {
   upgrader:  {
     goal: function(rm) {
       if (rm.defcon.level > 0)     { return 0 }
-      if (rm.controllerLevel() == 0) { return 0 }
-      if (rm.controllerLevel() == 8) { return 1 }
+      if (rm.controller.level == 0) { return 0 }
+      if (rm.controller.Level == 8) { return 1 }
 
-      var energyPerTick = rm.energyProduction()
+      var energyPerTick = rm.energyProduction
       var Upgrader = require('roles_upgrader')
       var parts = Upgrader.orderParts(rm, {})
       // essentially _.filter(p, p == WORK).length

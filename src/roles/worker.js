@@ -3,9 +3,9 @@ const GenericCreep = require(`roles_generic`)
 const WORKER_ROLES = ['builder', 'upgrader']
 
 class Worker extends GenericCreep {
-  static initializeMemory(roomManager) {
-    var base = super.initializeMemory(roomManager)
-    base.container = this._findContainerWithOpenSpot(base.source, roomManager)
+  static initializeMemory(room) {
+    var base = super.initializeMemory(room)
+    base.container = this._findContainerWithOpenSpot(base.source, room)
     return base
   }
 
@@ -13,14 +13,14 @@ class Worker extends GenericCreep {
     return WORKER_ROLES
   }
 
-  static _findContainerWithOpenSpot(source_id, roomManager) {
+  static _findContainerWithOpenSpot(source_id, room) {
     // containers next to sources
-    var sourceContainers = _.map(roomManager.sources(), (s) => s.container() )
+    var sourceContainers = _.map(room.sources, (s) => s.container() )
     // containers NOT next to sources, we want to prefer these
-    var openContainers = _.filter(roomManager.containers(), (c) => !sourceContainers.includes(c))
+    var openContainers = _.filter(room.containers, (c) => !sourceContainers.includes(c))
 
     if (openContainers.length > 0) {
-      var creeps = this.similarCreeps(roomManager)
+      var creeps = this.similarCreeps(room)
       var count = {}
       for (var i in openContainers) {
         // Get a count of creeps assigned to each container
@@ -34,9 +34,9 @@ class Worker extends GenericCreep {
     return source.container().id
   }
 
-  static orderParts(roomManager, memory) {
-    var extensions = Math.floor(roomManager.extensions().length/2)
-    var spawns = roomManager.spawns().length
+  static orderParts(room, memory) {
+    var extensions = Math.floor(room.extensions.length/2)
+    var spawns = room.spawns.length
 
     // TOUGH          10
     // MOVE           50

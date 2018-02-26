@@ -1,11 +1,12 @@
 'use strict'
 
 class Process {
-  constructor (pid, name, data, parent) {
+  constructor (pid, name, data, parent, sleep = 0) {
     this.pid = pid
     this.name = name
     this.data = data
     this.parent = parent
+    this.sleepAmount = sleep
   }
 
   getPriority () {
@@ -40,14 +41,14 @@ class Process {
     return false
   }
 
-  launchChildProcess (label, name, data = {}) {
+  launchChildProcess (label, name, data = {}, sleep = 0) {
     if (!this.data.children) {
       this.data.children = {}
     }
     if (this.data.children[label]) {
       return true
     }
-    this.data.children[label] = kernel.scheduler.launchProcess(name, data, this.pid)
+    this.data.children[label] = kernel.scheduler.launchProcess(name, data, this.pid, sleep)
     return this.data.children[label]
   }
 
@@ -136,6 +137,20 @@ class Process {
     }
 
     return false
+  }
+
+  wake() {
+    return kernel.scheduler.wake(this.pid)
+  }
+
+  sleep(ticks) {
+    return kernel.scheduler.sleep(this.pid, ticks)
+  }
+
+  wakeParent() {
+    if (this.parent) {
+      return kernel.scheduler.wake(this.parent)
+    }
   }
 
   suicide () {

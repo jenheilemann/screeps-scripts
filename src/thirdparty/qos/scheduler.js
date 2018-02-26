@@ -113,6 +113,13 @@ class Scheduler {
         continue
       }
 
+      // If this process is sleeping, then don't run it
+      if (this.memory.processes.index[this.memory.processes.running].s > Game.time) {
+        this.memory.processes.completed.push(this.memory.processes.running)
+        this.memory.processes.running = false
+        continue
+      }
+
       // If process has a parent and the parent has died kill the child process.
       if (this.memory.processes.index[this.memory.processes.running].p) {
         if (!this.isPidActive(this.memory.processes.index[this.memory.processes.running].p)) {
@@ -128,12 +135,14 @@ class Scheduler {
     return false
   }
 
-  launchProcess (name, data = {}, parent = false) {
+  launchProcess (name, data = {}, parent = false, sleep = 0) {
     const pid = this.getNextPid()
     this.memory.processes.index[pid] = {
       n: name,
       d: data,
-      p: parent
+      p: parent,
+      s: Game.time + sleep,
+      sl: sleep
     }
     const priority = this.getPriorityForPid(pid)
     if (!this.memory.processes.queues[priority]) {
@@ -169,6 +178,19 @@ class Scheduler {
     }
   }
 
+  wake (pid) {
+    if (this.memory.processes.index[pid]) {
+      this.memory.processes.index[pid].s = Game.time
+    }
+  }
+
+  sleep (pid, ticks) {
+    if (this.memory.processes.index[pid]) {
+      this.memory.processes.index[pid].s = Game.time + ticks
+      this.memory.processes.index[pid].sl = ticks
+    }
+  }
+
   getProcessCount () {
     return Object.keys(this.memory.processes.index).length
   }
@@ -192,7 +214,8 @@ class Scheduler {
       this.processCache[pid] = new ProgramClass(pid,
         this.memory.processes.index[pid].n,
         this.memory.processes.index[pid].d,
-        this.memory.processes.index[pid].p
+        this.memory.processes.index[pid].p,
+        this.memory.processes.index[pid].sl
       )
     }
     return this.processCache[pid]
@@ -200,6 +223,13 @@ class Scheduler {
 
   getProgramClass (program) {
     return require(`programs_${program}`)
+  }
+
+  clear () {
+    let pid
+    for (pid in this.memory.processes.index) {
+      this.kill(pid)
+    }
   }
 }
 

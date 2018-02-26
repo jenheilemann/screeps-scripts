@@ -6,14 +6,14 @@ class Builder extends WorkerCreep {
     return 'builder'
   }
 
-  static goalPopulation(roomManager) {
-    if (roomManager.defcon.level > 0) {
+  static goalPopulation(room) {
+    if (room.defcon.level > 0) {
       return 0
     }
-    var sites = roomManager.constructionSites()
+    var sites = room.constructionSites
 
     if (sites.length == 0) {
-      return this.repairGoalPopulation(roomManager)
+      return this.repairGoalPopulation(room)
     }
     var progress = _.sum(_.map(sites, 'progress'))
     var total = _.sum(_.map(sites, 'progressTotal'))
@@ -25,15 +25,15 @@ class Builder extends WorkerCreep {
     return 2
   }
 
-  static repairGoalPopulation(roomManager) {
-    var towers = roomManager.towers().length
+  static repairGoalPopulation(room) {
+    var towers = room.towers.length
     if (towers > 0) {
       return 0
     }
 
     // includes roads!
-    var structures = roomManager.repairNeededStructures().length +
-                     roomManager.repairNeededBarriers().length
+    var structures = room.repairNeededStructures().length +
+                     room.repairNeededBarriers().length
     return structures > 0 ? 1 : 0
   }
 

@@ -203,7 +203,7 @@ class QosKernel {
     sos.lib.segments.process()
 
     const processCount = this.scheduler.getProcessCount()
-    const completedCount = this.scheduler.memory.processes.completed.length
+    const completedCount = this.scheduler.getCompletedProcessCount()
 
     Logger.log(`Processes Run: ${completedCount}/${processCount}`, LOG_INFO, 'kernel')
     Logger.log(`Tick Limit: ${Game.cpu.tickLimit}`, LOG_INFO, 'kernel')

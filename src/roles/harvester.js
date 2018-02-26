@@ -6,12 +6,12 @@ class Harvester extends GenericCreep {
     return 'harvester'
   }
 
-  static orderParts(roomManager, memory) {
-    var extensions = roomManager.extensions().length
-    var numCouriers = roomManager.creepsByRole('courier').length
-    var numHarvesters = roomManager.creepsByRole('harvester').length
+  static orderParts(room, memory) {
+    var extensions = room.extensions.length
+    var numCouriers = room.creepsByRole('courier').length
+    var numHarvesters = room.creepsByRole('harvester').length
     var container = !!memory.container
-    var availableEnergy = roomManager.energyAvailableForSpawning()
+    var availableEnergy = room.energyAvailableForSpawning()
 
     // TOUGH          10
     // MOVE           50

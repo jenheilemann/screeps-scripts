@@ -58,6 +58,9 @@ class Performance {
 
     for (let priority of monitoriedPriorities) {
       const stats = sos.lib.monitor.getPriorityRunStats(priority)
+      if (!stats) {
+        continue
+      }
       report += '<tr>'
       report += `<td>${priority}</td>`
       report += `<td>${stats['short'].toFixed(3)}</td>`

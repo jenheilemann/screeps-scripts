@@ -2,8 +2,8 @@
 
 class CreepFactory {
 
-  constructor(roomManager, role, spawn) {
-    this.roomManager = roomManager
+  constructor(room, role, spawn) {
+    this.room = room
     this.role = role
     this.spawn = spawn
   }
@@ -14,9 +14,9 @@ class CreepFactory {
     }
 
     const klass = require(`roles_${this.role}`)
-    var memory = klass.initializeMemory(this.roomManager)
-    var name = this.role.substring(0,3) + this.roomManager.room.name + Game.time
-    var parts = klass.orderParts(this.roomManager, memory)
+    var memory = klass.initializeMemory(this.room)
+    var name = this.role.substring(0,3) + this.room.name + Game.time
+    var parts = klass.orderParts(this.room, memory)
     var result = this.spawn.spawnCreep(parts, name, { memory: memory })
 
     if (result == OK) {

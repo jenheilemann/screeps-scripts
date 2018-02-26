@@ -1,8 +1,8 @@
 'use strict'
 
 class DefconCalculator {
-  constructor(roomManager) {
-    this.roomManager = roomManager
+  constructor(room) {
+    this.room = room
     this.memory = this._initializeMemory()
   }
 
@@ -18,8 +18,8 @@ class DefconCalculator {
   }
 
   calculateLevel(previous) {
-    var enemies = this.roomManager.enemies()
-    var safe = this.roomManager.safeModeActive()
+    var enemies = this.room.enemies
+    var safe = this.room.safeModeActive
 
     switch(true) {
       case enemies.length == 0 || safe:
@@ -36,10 +36,10 @@ class DefconCalculator {
   }
 
   _initializeMemory() {
-    if (!this.roomManager.memory.defcon) {
-      this.roomManager.memory.defcon = { level: 0 }
+    if (!this.room.memory.defcon) {
+      this.room.memory.defcon = { level: 0 }
     }
-    return this.roomManager.memory.defcon
+    return this.room.memory.defcon
   }
 }
 

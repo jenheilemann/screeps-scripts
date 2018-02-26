@@ -11,38 +11,27 @@ class Player extends kernel.process {
   }
 
   main () {
-    // const rooms = Room.getCities()
-    // let roomname
-    // for (roomname of cities) {
-    //   /* Launch a "City" program for each city saved in memory. `Room.addCity` to add new rooms. */
-    //   if (Game.rooms[roomname] && Game.rooms[roomname].controller && Game.rooms[roomname].controller.my) {
-    //     this.launchChildProcess(`room_${roomname}`, 'city', {
-    //       'room': roomname
-    //     })
-    //   }
-    // }
+    // Organize colonies
+    const colonies = Room.getColonies()
+    let roomname, room
+    for (roomname of colonies) {
+      /** Launch a "Colony" program for each room saved in memory.
+       * `Room.addCity` to add new rooms.
+       */
+      room = Game.rooms[roomname]
+      if (room && room.controller && room.controller.my) {
+        this.launchChildProcess(`room_${roomname}`, 'colony', {
+          'room': roomname
+        })
+      }
+    }
 
-    // for (let priority of MONITOR_PRIORITIES) {
-    //   this.launchChildProcess(`pmonitor_${priority}`, 'meta_monitor', {
-    //     'priority': priority
-    //   })
-    // }
-
-    // if (qlib.events.getTimeSinceEvent('epoch') < 3000) {
-    //   return
-    // }
-
-    // const lastAdd = qlib.events.getTimeSinceEvent('addcity')
-    // if (empireAge > 10000 && lastAdd > 2000) {
-    //   const defaultPriorityStats = sos.lib.monitor.getPriorityRunStats(PRIORITIES_CREEP_DEFAULT)
-    //   if (defaultPriorityStats && defaultPriorityStats['long'] <= 1.25) {
-    //     if (cities.length < Game.gcl.level) {
-    //       if (cities.length > 1 || (Game.rooms[cities[0]] && Game.rooms[cities[0]].getRoomSetting('EXPAND_FROM'))) {
-    //         this.launchChildProcess('expand', 'empire_expand')
-    //       }
-    //     }
-    //   }
-    // }
+    // Monitor behavior of programs
+    for (let priority of MONITOR_PRIORITIES) {
+      this.launchChildProcess(`pmonitor_${priority}`, 'meta_monitor', {
+        'priority': priority
+      })
+    }
   }
 }
 

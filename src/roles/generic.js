@@ -27,15 +27,15 @@ class Generic {
     throw "Creep role can't be generic!"
   }
 
-  static initializeMemory(roomManager) {
-    var source_id = this._findSourceWithOpenSpot(roomManager)
+  static initializeMemory(room) {
+    var source_id = this._findSourceWithOpenSpot(room)
     var source = Game.getObjectById(source_id)
     var container_id = source.container().id
     return {
       role: this.role(),
       source: source_id,
       container: container_id,
-      mainRoom: roomManager.room.name
+      mainRoom: room.name
     }
   }
 
@@ -47,12 +47,12 @@ class Generic {
   }
 
   static similarCreeps(rm) {
-    return _.filter(rm.creeps(), (c) => this.comparisonRoles().includes(c.memory.role))
+    return _.filter(rm.colonyCreeps, (c) => this.comparisonRoles().includes(c.memory.role))
   }
 
-  static _findSourceWithOpenSpot(roomManager) {
-    var creeps = this.similarCreeps(roomManager)
-    var sources = _.map(roomManager.sources(), 'id')
+  static _findSourceWithOpenSpot(room) {
+    var creeps = this.similarCreeps(room)
+    var sources = _.map(room.sources, 'id')
     var count = {}
     for (var i in sources) {
       count[sources[i]] = _.filter(creeps, (h) => h.memory.source == sources[i]).length
