@@ -7,7 +7,7 @@ class Upgrader extends WorkerCreep {
   }
 
   makeDecisions() {
-    if (this.renewOrRecycle(this.roomManager.spawns()[0]) !== false) {
+    if (this.renewOrRecycle(this.room.spawns[0]) !== false) {
       return
     }
 
@@ -24,7 +24,7 @@ class Upgrader extends WorkerCreep {
     }
 
     if (this.collect() === false ) {
-      if (!this.roomManager.isEconomyWorking() ) {
+      if (!this.room.isEconomyWorking() ) {
         return this.harvest()
       }
     }

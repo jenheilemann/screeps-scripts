@@ -47,7 +47,7 @@ class Harvester extends GenericCreep {
   makeDecisions() {
     this.placeRoadConstructions()
 
-    if (this.renewOrRecycle(this.roomManager.spawns()[0]) !== false) {
+    if (this.renewOrRecycle(this.room.spawns[0]) !== false) {
       return
     }
 
@@ -63,7 +63,7 @@ class Harvester extends GenericCreep {
     }
 
     if(this.creep.memory.harvesting) {
-      var numCouriers = this.roomManager.creepsByRole('courier').length
+      var numCouriers = this.room.creepsByRole('courier').length
       var overContainer = numCouriers > 0
       return this.harvest(overContainer)
     }

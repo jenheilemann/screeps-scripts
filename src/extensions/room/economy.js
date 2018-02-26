@@ -1,7 +1,5 @@
 'use strict'
 
-
-
 Object.defineProperties(Room.prototype, {
   energyProduction: {
     get: function () {
@@ -32,4 +30,11 @@ Room.prototype.energyAvailableForSpawning = function() {
         _.sum(self.extensions, 'energy') +
         _.sum(self.sourceContainers, (c) => c.store.energy)
   }, [this])
+}
+
+Room.prototype.droppedEnergy = function() {
+  return this.cache.remember('droppedEnergy', function(self){
+    return _.sortBy(self.find(FIND_DROPPED_RESOURCES,
+      { filter: { resourceType: RESOURCE_ENERGY }}), 'amount')
+  }, [this]);
 }

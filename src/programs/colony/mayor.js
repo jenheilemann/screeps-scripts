@@ -16,7 +16,11 @@ class Mayor extends kernel.process {
   }
 
   main () {
-    console.log('mayor creeps', _.map(this.creeps, 'id') )
+    for (var cname in this.creeps) {
+      this.launchChildProcess(`creep_${cname}`, 'creep', {
+        'creep': cname
+      })
+    }
   }
 }
 

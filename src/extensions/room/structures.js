@@ -94,7 +94,7 @@ Object.defineProperties(Room.prototype, {
   spawns: {
     get: function () {
       return this.cache.remember('spanws', function(self){
-        return self.structuresByType[STRUCTURE_SPAWN]
+        return self.structuresByType[STRUCTURE_SPAWN] || []
       }, [this])
     }
   },
@@ -102,7 +102,7 @@ Object.defineProperties(Room.prototype, {
   extensions: {
     get: function () {
       return this.cache.remember('extensions', function(self){
-        return self.structuresByType[STRUCTURE_EXTENSION]
+        return self.structuresByType[STRUCTURE_EXTENSION] || []
       }, [this])
     }
   },
@@ -110,7 +110,7 @@ Object.defineProperties(Room.prototype, {
   containers: {
     get: function () {
       return this.cache.remember('containers', function(self){
-        return self.structuresByType[STRUCTURE_CONTAINER]
+        return self.structuresByType[STRUCTURE_CONTAINER] || []
       }, [this])
     }
   },
@@ -134,7 +134,7 @@ Object.defineProperties(Room.prototype, {
   towers: {
     get: function () {
       return this.cache.remember('towers', function(self){
-        return self.structuresByType[STRUCTURE_TOWER]
+        return self.structuresByType[STRUCTURE_TOWER] || []
       }, [this])
     }
   },
@@ -142,8 +142,8 @@ Object.defineProperties(Room.prototype, {
   barriers: {
     get: function() {
       return this.cache.remember('barriers', function(self){
-        var ramparts = self.structuresByType[STRUCTURE_RAMPART]
-        var walls = self.structuresByType[STRUCTURE_WALL]
+        var ramparts = self.structuresByType[STRUCTURE_RAMPART] || []
+        var walls = self.structuresByType[STRUCTURE_WALL] || []
         return ramparts.concat(walls)
       }, [this])
     }

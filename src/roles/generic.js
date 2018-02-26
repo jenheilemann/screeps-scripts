@@ -14,9 +14,9 @@ const STYLE = {
 }
 
 class Generic {
-  constructor(creep, roomManager) {
+  constructor(creep, room) {
     this.creep = creep
-    this.roomManager = roomManager
+    this.room = room
     this.source = Game.getObjectById(this.creep.memory.source)
     this.container = Game.getObjectById(this.creep.memory.container)
     this.memory = this.creep.memory
@@ -35,7 +35,7 @@ class Generic {
       role: this.role(),
       source: source_id,
       container: container_id,
-      mainRoom: room.name
+      colony: room.name
     }
   }
 
@@ -80,15 +80,15 @@ class Generic {
   }
 
   placeRoadConstructions() {
-    var constructionSites = this.roomManager.constructionSites()
-    var towers = this.roomManager.towers()
+    var constructionSites = this.room.constructionSites
+    var towers = this.room.towers
     if (constructionSites.length < 6 && towers.length > 1) {
       this.creep.room.createConstructionSite(this.creep, STRUCTURE_ROAD)
     }
   }
 
   build() {
-    var targets = this.roomManager.constructionSites()
+    var targets = this.room.constructionSites
     var nonRoad = targets.filter((c) => c.structureType != STRUCTURE_ROAD)
 
     // build non-road stuff, probably more important
@@ -131,7 +131,7 @@ class Generic {
     var trunkSpace = this.creep.carryCapacity - _.sum(this.creep.carry)
 
     if (!container || container.store.energy < 50) {
-      container = _.max(this.roomManager.containers(), (c) => container.store.energy)
+      container = _.max(this.room.containers, (c) => container.store.energy)
       if (!container || container.store.energy < 50) {
         return false
       }
@@ -144,7 +144,7 @@ class Generic {
   }
 
   gatherDropped() {
-    var energy = this.roomManager.droppedEnergy()
+    var energy = this.room.droppedEnergy()
 
     if (energy.length == 0) {
       return false
@@ -176,20 +176,20 @@ class Generic {
 
   findHungryDotOrSpawn() {
     var dot = this.creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
-      filter: (s) => s.structureType === STRUCTURE_EXTENSION && !s.isFull()
+      filter: (s) => s.structureType === STRUCTURE_EXTENSION && !s.isFull() && s.isActive()
     })
     if (dot) {
       return dot
     }
 
     var spawn = this.creep.pos.findClosestByRange(FIND_MY_STRUCTURES, {
-      filter: (s) => s.structureType === STRUCTURE_SPAWN && !s.isFull()
+      filter: (s) => s.structureType === STRUCTURE_SPAWN && !s.isFull() && s.isActive()
     })
     return spawn
   }
 
   refillOpenContainers() {
-    var containers = this.roomManager.openContainers().filter((c) => !c.isFull())
+    var containers = this.room.openContainers.filter((c) => !c.isFull())
 
     if (containers.length == 0) {
       return false
@@ -198,7 +198,7 @@ class Generic {
   }
 
   refillTowers(percent) {
-    var towers = this.roomManager.towers().filter((t) => t.energy/t.energyCapacity < percent)
+    var towers = this.room.towers.filter((t) => t.energy/t.energyCapacity < percent)
 
     if (towers.length === 0) {
       return false
@@ -207,7 +207,7 @@ class Generic {
   }
 
   refillStorage() {
-    var storage = this.roomManager.storage()
+    var storage = this.room.storage
     if (!storage || storage.isFull()) {
       return false
     }
@@ -234,7 +234,7 @@ class Generic {
       return false
     }
 
-    var controller = this.roomManager.controller()
+    var controller = this.room.controller
     if( !this.creep.pos.inRangeTo(controller, 3) ) {
       return this.creep.moveTo(controller, { reusePath: 10, visualizePathStyle: STYLE['upgrade']});
     }
@@ -250,7 +250,7 @@ class Generic {
     }
 
     // towers can handle it
-    var towers = this.roomManager.towers()
+    var towers = this.room.towers
     if (towers.length > 0 && _.sum(towers, 'energy') > 100 ) {
       return false
     }
@@ -312,11 +312,11 @@ class Generic {
   }
 
   worthRenewing() {
-    var newParts = this.constructor.orderParts(this.roomManager, {}).length
+    var newParts = this.constructor.orderParts(this.room, {}).length
     const PopulationManager = require('managers_population')
-    var manager = new PopulationManager(this.roomManager)
+    var manager = new PopulationManager(this.room)
     var goal = manager.goalByRole(this.constructor.role())
-    var current = (this.roomManager.creepsByRole(this.constructor.role())).length
+    var current = (this.room.creepsByRole(this.constructor.role())).length
     if (goal < current) {
       return false
     }
