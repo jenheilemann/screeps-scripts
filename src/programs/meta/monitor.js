@@ -7,9 +7,11 @@
  */
 
 class MetaMonitorPriority extends kernel.process {
-  getPriority () {
-    return this.data.priority
+  constructor (...args) {
+    super(...args)
+    this.priority = this.data.priority
   }
+
   getDescriptor () {
     return this.data.priority
   }

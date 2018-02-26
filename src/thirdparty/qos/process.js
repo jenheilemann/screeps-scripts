@@ -1,16 +1,25 @@
 'use strict'
 
 class Process {
-  constructor (pid, name, data, parent, sleep = 0) {
+  constructor (pid, name, data, parent, wakeTick = 0) {
     this.pid = pid
     this.name = name
     this.data = data
     this.parent = parent
-    this.sleepAmount = sleep
+    this.wakeTick = wakeTick
+
+    this.priority = DEFAULT_PRIORITY
+    this.alive = true
+    this.completed = false
   }
 
-  getPriority () {
-    return this.priority || DEFAULT_PRIORITY
+  toHash() {
+    return {
+      n: this.name,
+      d: this.data,
+      p: this.parent,
+      w: this.wakeTick
+    }
   }
 
   clean () {
@@ -39,6 +48,14 @@ class Process {
 
   getPerformanceDescriptor () {
     return false
+  }
+
+  getProcessName() {
+    let name = this.name
+    if (this.getDescriptor()) {
+      name = `${name} ${this.getDescriptor()}`
+    }
+    return name
   }
 
   launchChildProcess (label, name, data = {}, sleep = 0) {
@@ -70,7 +87,7 @@ class Process {
     return kernel.scheduler.isPidActive(pid)
   }
 
-  launchProcess (label, name, data = {}) {
+  launchProcess (label, name, data = {}, sleep = 0) {
     if (!this.data.processes) {
       this.data.processes = {}
     }
@@ -78,7 +95,7 @@ class Process {
     if (this.data.processes[label]) {
       return true
     }
-    this.data.processes[label] = kernel.scheduler.launchProcess(name, data)
+    this.data.processes[label] = kernel.scheduler.launchProcess(name, data, false, sleep)
     return this.data.processes[label]
   }
 
@@ -121,10 +138,6 @@ class Process {
     }
   }
 
-  getCluster (name, room) {
-    return new qlib.Cluster(`${name}_${this.pid}`, room)
-  }
-
   period (interval, label = 'default') {
     if (!this.data.period) {
       this.data.period = {}
@@ -139,27 +152,40 @@ class Process {
     return false
   }
 
-  wake() {
-    return kernel.scheduler.wake(this.pid)
+  wake () {
+    this.wakeTick = Game.time
   }
 
-  sleep(ticks) {
-    return kernel.scheduler.sleep(this.pid, ticks)
+  sleep (ticks) {
+    this.wakeTick = Game.time + ticks
   }
 
-  wakeParent() {
+  wakeParent () {
     if (this.parent) {
       return kernel.scheduler.wake(this.parent)
     }
   }
 
   suicide () {
-    return kernel.scheduler.kill(this.pid)
+    this.alive = false
+    let label
+    for (label in this.data.children) {
+      kernel.scheduler.kill(this.data.children[label])
+    }
+  }
+
+  isDead () {
+    return !this.alive
+  }
+
+  isSleeping() {
+    return this.wakeTick > Game.time
   }
 
   run () {
     this.clean()
     this.main()
+    this.completed = true
   }
 }
 

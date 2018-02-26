@@ -58,8 +58,6 @@ class QosKernel {
       this.cleanMemory()
     }
 
-    this.scheduler.shift()
-
     if (this.scheduler.getProcessCount() <= 0) {
       this.scheduler.launchProcess('player')
     }
@@ -86,21 +84,12 @@ class QosKernel {
       }
       Logger.defaultLogGroup = runningProcess.name
       try {
-        let processName = runningProcess.name
-        const descriptor = runningProcess.getDescriptor()
-        if (descriptor) {
-          processName += ' ' + descriptor
-        }
+        let processName = runningProcess.getProcessName()
 
         Logger.log(`Running ${processName} (pid ${runningProcess.pid})`, LOG_TRACE, 'kernel')
         const startCpu = Game.cpu.getUsed()
         runningProcess.run()
-        let performanceName = runningProcess.name
-        const performanceDescriptor = runningProcess.getPerformanceDescriptor()
-        if (performanceDescriptor) {
-          performanceName += ' ' + performanceDescriptor
-        }
-        this.performance.addProgramStats(performanceName, Game.cpu.getUsed() - startCpu)
+        this.performance.addProgramStats(processName, Game.cpu.getUsed() - startCpu)
       } catch (err) {
         let message = 'program error occurred\n'
         message += `process ${runningProcess.pid}: ${runningProcess.name}\n`
@@ -124,7 +113,8 @@ class QosKernel {
       return true
     }
 
-    // If the bucket has dropped below the emergency level enable the bucket rebuild functionality.
+    // If the bucket has dropped below the emergency level enable the bucket
+    // rebuild functionality.
     if (Game.cpu.bucket <= BUCKET_EMERGENCY) {
       if (!Memory.qos.last_build_bucket || (Game.time - Memory.qos.last_build_bucket) > BUCKET_BUILD_LIMIT) {
         Memory.qos.build_bucket = true
@@ -201,9 +191,10 @@ class QosKernel {
   shutdown () {
     sos.lib.vram.saveDirty()
     sos.lib.segments.process()
+    this.scheduler.shutdown()
 
-    const processCount = this.scheduler.getProcessCount()
     const completedCount = this.scheduler.getCompletedProcessCount()
+    const processCount = this.scheduler.getProcessCount()
 
     Logger.log(`Processes Run: ${completedCount}/${processCount}`, LOG_INFO, 'kernel')
     Logger.log(`Tick Limit: ${Game.cpu.tickLimit}`, LOG_INFO, 'kernel')
