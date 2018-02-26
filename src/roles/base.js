@@ -13,10 +13,11 @@ const STYLE = {
   recycle: {stroke: '#aaaaff', width: 0.1, opacity: 0.6},
 }
 
-class Generic {
-  constructor(creep, room) {
+class BaseRole {
+  constructor(creep, room, program) {
     this.creep = creep
     this.room = room
+    this.program = program
     this.source = Game.getObjectById(this.creep.memory.source)
     this.container = Game.getObjectById(this.creep.memory.container)
     this.memory = this.creep.memory
@@ -378,4 +379,4 @@ class Generic {
 
 }
 
-module.exports = Generic
+module.exports = BaseRole

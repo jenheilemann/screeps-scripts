@@ -1,8 +1,8 @@
 'use strict'
-const GenericCreep = require(`roles_generic`)
+const BaseRole = require(`roles_base`)
 const WORKER_ROLES = ['builder', 'upgrader']
 
-class Worker extends GenericCreep {
+class Worker extends BaseRole {
   static initializeMemory(room) {
     var base = super.initializeMemory(room)
     base.container = this._findContainerWithOpenSpot(base.source, room)

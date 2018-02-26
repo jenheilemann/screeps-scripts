@@ -1,7 +1,7 @@
 'use strict'
-const GenericCreep = require(`roles_generic`)
+const BaseRole = require(`roles_base`)
 
-class Courier extends GenericCreep {
+class Courier extends BaseRole {
   static role() {
     return 'courier'
   }

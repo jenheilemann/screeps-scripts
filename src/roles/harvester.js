@@ -1,7 +1,7 @@
 'use strict'
-const GenericCreep = require(`roles_generic`)
+const BaseRole = require(`roles_base`)
 
-class Harvester extends GenericCreep {
+class Harvester extends BaseRole {
   static role() {
     return 'harvester'
   }
@@ -45,12 +45,6 @@ class Harvester extends GenericCreep {
   }
 
   makeDecisions() {
-    this.placeRoadConstructions()
-
-    if (this.renewOrRecycle(this.room.spawns[0]) !== false) {
-      return
-    }
-
     if(this.creep.carryCapacity == 0) {
       return this.harvest(true)
     }

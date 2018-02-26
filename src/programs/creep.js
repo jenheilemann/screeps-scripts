@@ -19,7 +19,7 @@ class Creep extends kernel.process {
 
     var role = this.creep.memory.role
     var klass = require(`roles_${role}`)
-    var runner = new klass(this.creep, this.creep.room)
+    var runner = new klass(this.creep, this.creep.room, this)
 
     runner.makeDecisions();
   }
