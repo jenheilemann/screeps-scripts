@@ -38,7 +38,6 @@ require(`extensions_construction_site`)
 global.StructureNull = require(`extensions_structure_null`)
 
 module.exports.loop = function () {
-  if(Game.time % 23 == 3) { console.log(`CPU bucket: ${Game.cpu.bucket}`) }
   if (Game.cpu.bucket < 500) {
     if (Game.cpu.limit !== 0) {
       Logger.log('Extremely low bucket - aborting script run at start of loop', LOG_FATAL)

@@ -56,6 +56,13 @@ class Logger {
     console.log(message)
   }
 
+  trace(message, group = false, tags = []) { this.log(message, LOG_TRACE, group, tags) }
+  debug(message, group = false, tags = []) { this.log(message, LOG_DEBUG, group, tags) }
+  info (message, group = false, tags = [])  { this.log(message, LOG_INFO, group, tags) }
+  warn (message, group = false, tags = [])  { this.log(message, LOG_WARN, group, tags) }
+  error(message, group = false, tags = []) { this.log(message, LOG_ERROR, group, tags) }
+  fatal(message, group = false, tags = []) { this.log(message, LOG_FATAL, group, tags) }
+
   logData (data, severity, group) {
     try {
       this.log(JSON.stringify(data), severity, group)

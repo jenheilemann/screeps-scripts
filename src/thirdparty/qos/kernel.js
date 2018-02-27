@@ -35,23 +35,23 @@ class QosKernel {
 
   start () {
     // Announce new uploads
-    Logger.log(`Initializing Kernel for tick ${Game.time}`, LOG_TRACE, 'kernel')
+    Logger.info(`Initializing Kernel for tick ${Game.time}`, 'kernel')
     if (!Memory.qos.script_version || Memory.qos.script_version !== SCRIPT_VERSION) {
-      Logger.log(`New script upload detected: ${SCRIPT_VERSION}`, LOG_WARN)
+      Logger.warn(`New script upload detected: ${SCRIPT_VERSION}`)
       Memory.qos.script_version = SCRIPT_VERSION
       Memory.qos.script_upload = Game.time
       this.performance.clear()
     }
 
     if (this.newglobal) {
-      Logger.log(`New Global Detected`, LOG_INFO)
+      Logger.info(`New Global Detected`)
     }
 
     sos.lib.segments.moveToGlobalCache()
     sos.lib.stormtracker.track()
 
     if (sos.lib.stormtracker.isStorming()) {
-      Logger.log(`Reset Storm Detected`, LOG_INFO)
+      Logger.info(`Reset Storm Detected`)
     }
 
     if (Game.time % 7 === 0) {
@@ -64,7 +64,7 @@ class QosKernel {
   }
 
   cleanMemory () {
-    Logger.log('Cleaning memory', LOG_TRACE, 'kernel')
+    Logger.trace('Cleaning memory', 'kernel')
     let i
     for (i in Memory.creeps) { // jshint ignore:line
       if (!Game.creeps[i]) {
@@ -86,7 +86,7 @@ class QosKernel {
       try {
         let processName = runningProcess.getProcessName()
 
-        Logger.log(`Running ${processName} (pid ${runningProcess.pid})`, LOG_TRACE, 'kernel')
+        Logger.trace(`Running (${runningProcess.priority}) ${processName} (pid ${runningProcess.pid})`, 'kernel')
         const startCpu = Game.cpu.getUsed()
         runningProcess.run()
         this.performance.addProgramStats(processName, Game.cpu.getUsed() - startCpu)
@@ -94,7 +94,7 @@ class QosKernel {
         let message = 'program error occurred\n'
         message += `process ${runningProcess.pid}: ${runningProcess.name}\n`
         message += !!err && !!err.stack ? err.stack : err.toString()
-        Logger.log(message, LOG_ERROR)
+        Logger.error(message)
       }
       Logger.defaultLogGroup = 'default'
     }
@@ -196,11 +196,11 @@ class QosKernel {
     const completedCount = this.scheduler.getCompletedProcessCount()
     const processCount = this.scheduler.getProcessCount()
 
-    Logger.log(`Processes Run: ${completedCount}/${processCount}`, LOG_INFO, 'kernel')
-    Logger.log(`Tick Limit: ${Game.cpu.tickLimit}`, LOG_INFO, 'kernel')
-    Logger.log(`Kernel Limit: ${this.getCpuLimit()}`, LOG_INFO, 'kernel')
-    Logger.log(`CPU Used: ${Game.cpu.getUsed()}`, LOG_INFO, 'kernel')
-    Logger.log(`Bucket: ${Game.cpu.bucket}`, LOG_INFO, 'kernel')
+    Logger.info(`Processes Run: ${completedCount}/${processCount}`, 'kernel')
+    Logger.info(`Tick Limit: ${Game.cpu.tickLimit}`, 'kernel')
+    Logger.info(`Kernel Limit: ${this.getCpuLimit()}`, 'kernel')
+    Logger.info(`CPU Used: ${Game.cpu.getUsed()}`, 'kernel')
+    Logger.info(`Bucket: ${Game.cpu.bucket}`, 'kernel')
 
     if (Game.time % 50 === 0) {
       this.performance.reportHtml()
