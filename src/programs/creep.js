@@ -17,6 +17,10 @@ class Creep extends kernel.process {
       return
     }
 
+    if (this.creep.spawning) {
+      return
+    }
+
     var role = this.creep.memory.role
     var klass = require(`roles_${role}`)
     var runner = new klass(this.creep, this.creep.room, this)

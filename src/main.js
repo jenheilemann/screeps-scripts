@@ -27,6 +27,7 @@ require('thirdparty_creeptalk')({
 // Various extensions to the base game objects
 require(`extensions_creep`)
 require(`extensions_room`)
+require(`extensions_room_position`)
 require(`extensions_source`)
 require(`extensions_structure`)
 require(`extensions_structure_container`)

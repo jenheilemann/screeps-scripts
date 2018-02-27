@@ -33,10 +33,6 @@ class Courier extends BaseRole {
   }
 
   makeDecisions() {
-    if (this.renewOrRecycle(this.room.spawns[0]) !== false) {
-      return
-    }
-
     if (this.creep.carry.energy == 0) {
       this.memory.collect = true
     }

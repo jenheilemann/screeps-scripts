@@ -7,8 +7,6 @@
 class Mayor extends kernel.process {
   constructor (...args) {
     super(...args)
-    this.room = Game.rooms[this.data.room]
-    this.creeps = this.room.colonyCreeps
   }
 
   getDescriptor() {
@@ -16,7 +14,14 @@ class Mayor extends kernel.process {
   }
 
   main () {
-    for (var cname in this.creeps) {
+    var room = Game.rooms[this.data.room]
+    if (!room) {
+      this.suicide()
+      return
+    }
+
+    var creeps = room.colonyCreeps
+    for (var cname in creeps) {
       this.launchChildProcess(`creep_${cname}`, 'creep', {
         'creep': cname
       })

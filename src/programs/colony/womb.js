@@ -7,8 +7,7 @@
 class Womb extends kernel.process {
   constructor (...args) {
     super(...args)
-    this.room = Game.rooms[this.data.room]
-    this.creeps = this.room.colonyCreeps
+    this.priority = PRIORITIES_SPAWNS
   }
 
   getDescriptor() {
@@ -16,6 +15,13 @@ class Womb extends kernel.process {
   }
 
   main () {
+    this.room = Game.rooms[this.data.room]
+    if (!this.room) {
+      this.suicide()
+      return
+    }
+    this.creeps = this.room.colonyCreeps
+
     if ( this.room.spawns.length == 0 ) {
       return this.suicide()
     }

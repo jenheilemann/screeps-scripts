@@ -129,6 +129,9 @@ class Scheduler {
   }
 
   isPidActive(pid) {
+    if (!this.memory.processes.index[pid]) {
+      return false
+    }
     var proc = this.getProcessForPid(pid)
     return !proc.isDead()
   }
@@ -136,6 +139,7 @@ class Scheduler {
   getProcessForPid (pid) {
     if (!this.processCache[pid]) {
       let info = this.memory.processes.index[pid]
+      if (!info) { return false }
       const ProgramClass = this.getProgramClass(info.n)
       this.processCache[pid] = new ProgramClass(pid, info.n, info.d, info.p, info.w)
     }

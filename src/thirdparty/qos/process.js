@@ -22,6 +22,10 @@ class Process {
     }
   }
 
+  toString() {
+    return `Process ${this.pid} ${this.priority} ${this.getProcessName()}`
+  }
+
   clean () {
     if (this.data.children) {
       let label

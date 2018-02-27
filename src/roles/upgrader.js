@@ -7,10 +7,6 @@ class Upgrader extends WorkerCreep {
   }
 
   makeDecisions() {
-    if (this.renewOrRecycle(this.room.spawns[0]) !== false) {
-      return
-    }
-
     if(this.memory.upgrading && this.creep.carry.energy == 0) {
       this.memory.upgrading = false;
     }

@@ -8,6 +8,11 @@ const CENSUS_FREQUENCY = 57
  */
 
 class Census extends kernel.process {
+  constructor (...args) {
+    super(...args)
+    this.priority = PRIORITIES_COLONY_CENSUS
+  }
+
   getDescriptor() {
     return this.data.room
   }

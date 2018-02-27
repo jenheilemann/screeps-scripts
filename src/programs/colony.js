@@ -18,7 +18,7 @@ class Colony extends kernel.process {
   main () {
     this.room = Game.rooms[this.data.room]
     if (!this.room || !this.room.controller.my) {
-      Room.removeCity(this.data.room)
+      Room.removeColony(this.data.room)
       return this.suicide()
     }
 

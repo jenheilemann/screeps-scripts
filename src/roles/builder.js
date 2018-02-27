@@ -38,10 +38,6 @@ class Builder extends WorkerCreep {
   }
 
   makeDecisions() {
-    if (this.renewOrRecycle(this.roomManager.spawns()[0]) !== false) {
-      return
-    }
-
     if(this.memory.building && this.creep.carry.energy == 0) {
       this.memory.reparable = null
       this.memory.building = false
@@ -51,23 +47,23 @@ class Builder extends WorkerCreep {
     }
 
     if(this.memory.building) {
-      if (this.repair(this.roomManager.rottingRamparts()) !== false) {
+      if (this.repair(this.room.rottingRamparts()) !== false) {
         return
       }
       if (this.build() !== false) {
         return
       }
-      if (this.repair(this.roomManager.repairNeededStructures(0.95)) !== false) {
+      if (this.repair(this.room.repairNeededStructures(0.95)) !== false) {
         return
       }
-      if (this.repair(this.roomManager.repairNeededBarriers()) !== false) {
+      if (this.repair(this.room.repairNeededBarriers()) !== false) {
         return
       }
       return this.moveOffRoad()
     }
 
     if (this.collect() === false ) {
-      if (!this.roomManager.isEconomyWorking() ) {
+      if (!this.room.isEconomyWorking() ) {
         return this.harvest()
       }
     }

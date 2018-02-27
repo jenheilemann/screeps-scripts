@@ -176,3 +176,9 @@ Room.prototype.repairNeededBarriers = function(percent = 0.8) {
       });
     }, [this.barriers, percent, avg])
 }
+
+Room.prototype.rottingRamparts = function() {
+  return this.cache.remember('rottingRamparts', function(barriers){
+    return _.filter(barriers, (s) => s.isRampart() && s.hits < 600)
+  }, [this.repairNeededBarriers()])
+}
