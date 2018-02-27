@@ -26,7 +26,7 @@ class Scheduler {
 
   get queue() {
     if (!this._queue) {
-      this._queue = new Queue('priority', this.inflateProcesses())
+      this._queue = new Queue(this.inflateProcesses(), 'priority')
     }
     return this._queue
   }

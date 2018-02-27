@@ -1,9 +1,9 @@
 'use strict'
 
 class Queue {
-  constructor (comparison, processes) {
+  constructor (listItems, comparison) {
     this.comp = comparison
-    this.list = [null].concat(_.sortBy(processes, (p) => p[this.comp] ))
+    this.list = [null].concat(_.sortBy(listItems, (p) => p[this.comp] ))
   }
 
   pop () {
@@ -44,11 +44,11 @@ class Queue {
     var leftElement = this.list[childIndex]
     var rightElement = this.list[childIndex + 1]
 
-    if (notTheLast && rightElement < leftElement) {
-      childIndex = childIndex++
+    if (notTheLast && rightElement[this.comp] < leftElement[this.comp]) {
+      childIndex = childIndex + 1
     }
 
-    if (this.list[index][this.comp] <= this.list[childIndex][this.comp]) {
+    if (this.list[index][this.comp] < this.list[childIndex][this.comp]) {
       return
     }
 
