@@ -2,17 +2,15 @@
 
 Source.prototype.container = function () {
   var container, containers
+  var pos = this.pos
   this.initializeMemory();
 
   if (typeof(this.memory.container) != 'string' && Game.time - this.memory.containerSearch > 17) {
     this.memory.containerSearch = Game.time
-    containers = this.room.find(FIND_STRUCTURES, {filter: {structureType: STRUCTURE_CONTAINER}})
-    for (var i in containers) {
-      if (this.pos.isNearTo(containers[i])) {
-        container = containers[i]
-        this.memory.container = container.id
-        break;
-      }
+    containers = this.room.containers
+    container = pos.findClosestByRange(containers, { filter: (c) => pos.isNearTo(c) })[0]
+    if (container) {
+      this.memory.container = container.id
     }
   }
 

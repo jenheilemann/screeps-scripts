@@ -29,16 +29,6 @@ class Farm extends BaseTask {
     }
 
     var source = Game.getObjectById(this.data.src)
-    if(!pos.isNearTo(source)) {
-      this.launchChildProcess(`move_to_source`, 'creep_tasks_move', {
-        cp:    this.data.cp,
-        pos:   source.pos.toHash(),
-        range: 1,
-        style: 'harvest'
-      })
-      var sleepFor = Math.floor(pos.findPathTo(source.pos).length*1.5)
-      return this.sleep(sleepFor)
-    }
 
     if (creep.carryCapacity == 0 || !creep.isFull() ){
       this.launchChildProcess(`harvest_energy`, 'creep_tasks_harvest', {

@@ -7,17 +7,18 @@ Object.defineProperty(Room.prototype, 'colonyCreeps', {
     let refreshCache = false
 
     if (cached && !_.isEmpty(cached)) {
-      _.map(cached, function(name) {
+      _.each(cached, function(name) {
         var creep = Game.creeps[name]
         if (creep) {
           creeps[name] = creep
+        } else {
+          refreshCache = true
         }
-        refreshCache = true
       })
     }
 
     if (_.isEmpty(creeps) || refreshCache) {
-      _.map(_.filter(Game.creeps, (c) => c.memory.colony === this.name), function(c) {
+      _.each(_.filter(Game.creeps, (c) => c.memory.colony === this.name), function(c) {
         creeps[c.name] = c
       })
       sos.lib.cache.set(`${this.name}.colonyCreeps`, Object.keys(creeps), {

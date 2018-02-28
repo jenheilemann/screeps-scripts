@@ -14,7 +14,6 @@ class Upgrader extends WorkerCreep {
       this.memory.upgrading = true;
     }
 
-    this.placeRoadConstructions();
     if(this.memory.upgrading) {
       return this.upgrade()
     }

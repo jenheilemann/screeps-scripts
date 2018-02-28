@@ -5,7 +5,7 @@ const BaseTask = require('programs_creep_tasks_base')
  * Organizes the creep workforce within the colony.
  */
 
-class Harvest extends BaseTask {
+class FillObject extends BaseTask {
   main () {
     var creep = Game.creeps[this.data.cp]
 
@@ -13,29 +13,35 @@ class Harvest extends BaseTask {
       this.suicide()
       return
     }
-    Logger.debug(`Harvesting: ${creep.name}`)
 
-    if (creep.numParts(CARRY) > 0 && creep.isFull()) {
+    if (creep.isEmpty()) {
       this.wakeParent()
       this.suicide()
       return
     }
 
-    var source = Game.getObjectById(this.data.src)
+    var target = Game.getObjectById(this.data.to)
 
-    if (!creep.pos.isNearTo(source.pos)) {
-      this.launchChildProcess(`move_to_source`, 'creep_tasks_move', {
+    if (!target || target.isFull()) {
+      this.wakeParent()
+      this.suicide()
+      return
+    }
+
+    if (!creep.pos.isNearTo(target)) {
+      this.launchChildProcess(`move_to_target`, 'creep_tasks_move', {
         cp:    this.data.cp,
-        pos:   source.pos.toHash(),
+        pos:   target.pos.toHash(),
         range: 1,
-        style: 'harvest'
+        style: 'courier'
       })
       var sleepFor = Math.floor(pos.findPathTo(source.pos).length*1.5)
       return this.sleep(sleepFor)
     }
 
-    creep.harvest(source)
+    creep.transfer(target, this.data.resource)
   }
 }
 
-module.exports = Harvest
+
+module.exports = FillObject

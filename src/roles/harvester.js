@@ -43,34 +43,6 @@ class Harvester extends BaseRole {
         return [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE, MOVE]
     }
   }
-
-  makeDecisions() {
-    if(!this.creep.canCarry()) {
-      return this.harvest(true)
-    }
-
-    if(this.creep.isEmpty()) {
-      var numCouriers = this.room.creepsByRole('courier').length
-      var overContainer = numCouriers > 0 && this.container !== null
-      return this.harvest(overContainer)
-    }
-
-    if (this.refillSpawns() === false){
-      this.upgrade()
-    }
-  }
-
-  harvest(toContainer = false) {
-    var container_id = this.container ? this.container.id : null
-    this.program.launchChildProcess(`creep_harvest`, 'creep_tasks_farm', {
-      cp:  this.creep.name,
-      cn:  container_id,
-      src: this.source.id,
-      toC: toContainer
-    })
-    this.program.sleep(this.creep.ticksToLive)
-  }
-
 }
 
 module.exports = Harvester

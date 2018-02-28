@@ -1,14 +1,10 @@
 'use strict'
 
 /**
- * Organizes the creep workforce within the colony.
+ * Tells Courier creeps what to do.
  */
 
-class Creep extends kernel.process {
-  getDescriptor() {
-    return this.data.creep
-  }
-
+class Courier extends kernel.process {
   main () {
     this.creep = Game.creeps[this.data.creep]
 
@@ -21,12 +17,11 @@ class Creep extends kernel.process {
       return
     }
 
-    var role = this.creep.memory.role
-    var klass = require(`roles_${role}`)
+    var klass = require(`roles_courier`)
     var runner = new klass(this.creep, this.creep.room, this)
 
     runner.makeDecisions();
   }
 }
 
-module.exports = Creep
+module.exports = Courier

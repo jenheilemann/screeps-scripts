@@ -21,8 +21,10 @@ class Mayor extends kernel.process {
     }
 
     var creeps = room.colonyCreeps
+    let role
     for (var cname in creeps) {
-      this.launchChildProcess(`creep_${cname}`, 'creep', {
+      role = Game.creeps[cname].memory.role
+      this.launchChildProcess(cname, `creep_${role}`, {
         'creep': cname
       })
     }

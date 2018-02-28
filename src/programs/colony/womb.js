@@ -20,7 +20,6 @@ class Womb extends kernel.process {
       this.suicide()
       return
     }
-    this.creeps = this.room.colonyCreeps
 
     if ( this.room.spawns.length == 0 ) {
       return this.suicide()
@@ -34,6 +33,7 @@ class Womb extends kernel.process {
     }
 
     if (!this.room.memory.nextCreep) {
+      this.sleep(7)
       return
     }
 
