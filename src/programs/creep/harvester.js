@@ -43,7 +43,7 @@ class Harvester extends kernel.process {
   }
 
   harvest(toContainer = false) {
-    this.launchChildProcess(`creep_harvest`, 'creep_tasks_farm', {
+    this.launchChildProcess(`farm`, 'creep_tasks_farm', {
       cp:  this.creep.name,
       cn:  this.container.id,
       src: this.source.id,
@@ -56,7 +56,7 @@ class Harvester extends kernel.process {
     if (!addressee) {
       return false
     }
-    this.launchChildProcess(`creep_refill_spawn`, 'creep_tasks_fill_object', {
+    this.launchChildProcess(`refill_spawn`, 'creep_tasks_fill_object', {
       cp: this.creep.name,
       to: addressee.id,
       resource: RESOURCE_ENERGY
@@ -78,7 +78,7 @@ class Harvester extends kernel.process {
   }
 
   upgrade() {
-    this.launchChildProcess(`creep_upgrade`, 'creep_tasks_upgrade', {
+    this.launchChildProcess(`upgrade`, 'creep_tasks_upgrade', {
       cp: this.creep.name,
       id: this.room.controller.id
     })

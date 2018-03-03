@@ -25,7 +25,9 @@ require('thirdparty_creeptalk')({
 })
 
 // Various extensions to the base game objects
+require(`extensions_construction_site`)
 require(`extensions_creep`)
+require(`extensions_resource`)
 require(`extensions_room`)
 require(`extensions_room_position`)
 require(`extensions_source`)
@@ -35,7 +37,6 @@ require(`extensions_structure_extension`)
 require(`extensions_structure_spawn`)
 require(`extensions_structure_tower`)
 require(`extensions_structure_storage`)
-require(`extensions_construction_site`)
 global.StructureNull = require(`extensions_structure_null`)
 
 module.exports.loop = function () {

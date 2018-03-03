@@ -35,7 +35,7 @@ class FillObject extends BaseTask {
         range: 1,
         style: 'courier'
       })
-      var sleepFor = Math.floor(pos.findPathTo(source.pos).length*1.5)
+      var sleepFor = Math.ceil(creep.pos.findPathTo(target.pos).length/2)
       return this.sleep(sleepFor)
     }
 
