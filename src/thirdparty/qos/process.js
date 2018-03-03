@@ -170,6 +170,12 @@ class Process {
     }
   }
 
+  killChild(label) {
+    if (this.data.children && this.data.children[label])  {
+      kernel.scheduler.kill(this.data.children[label])
+    }
+  }
+
   suicide () {
     this.alive = false
     let label

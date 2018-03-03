@@ -250,12 +250,6 @@ class BaseRole {
       return false
     }
 
-    // towers can handle it
-    var towers = this.room.towers
-    if (towers.length > 0 && _.sum(towers, 'energy') > 100 ) {
-      return false
-    }
-
     if (this.memory.repairable && Game.time - this.memory.repairStarted < 25) {
       repairable = Game.getObjectById(this.memory.repairable)
       // something got destroyed, probably

@@ -10,6 +10,18 @@ class Sheriff extends kernel.process {
   }
 
   main () {
+    var room = Game.rooms[this.data.room]
+    if (!room) {
+      this.suicide()
+      return
+    }
+
+    var towers = room.towers
+    for (var i in towers) {
+      this.launchChildProcess(towers[i].id, `tower_commander`, {
+        'tower': towers[i].id
+      })
+    }
   }
 }
 

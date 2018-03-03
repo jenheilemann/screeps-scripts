@@ -22,6 +22,37 @@ Object.defineProperty(Room.prototype, 'colonyCreeps', {
         creeps[c.name] = c
       })
       sos.lib.cache.set(`${this.name}.colonyCreeps`, Object.keys(creeps), {
+        maxttl: 23,
+        persist: true
+      })
+    }
+
+    return creeps
+  }
+})
+
+Object.defineProperty(Room.prototype, 'friendlies', {
+  get: function () {
+    let cached = sos.lib.cache.get(`${this.name}.friendlies`)
+    let creeps = {}
+    let refreshCache = false
+
+    if (cached && !_.isEmpty(cached)) {
+      _.each(cached, function(name) {
+        var creep = Game.creeps[name]
+        if (creep) {
+          creeps[name] = creep
+        } else {
+          refreshCache = true
+        }
+      })
+    }
+
+    if (_.isEmpty(creeps) || refreshCache) {
+      _.each(this.find(FIND_MY_CREEPS), function(c) {
+        creeps[c.name] = c
+      })
+      sos.lib.cache.set(`${this.name}.friendlies`, Object.keys(creeps), {
         maxttl: 79,
         persist: true
       })

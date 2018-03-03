@@ -53,6 +53,13 @@ class Builder extends WorkerCreep {
       if (this.build() !== false) {
         return
       }
+
+      // towers can handle it
+      var towers = this.room.towers
+      if (towers.length > 0 && _.sum(towers, 'energy') > 100 ) {
+        return this.moveOffRoad()
+      }
+
       if (this.repair(this.room.repairNeededStructures(0.95)) !== false) {
         return
       }
