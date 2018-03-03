@@ -99,13 +99,13 @@ const DISTRIBUTION = {
       if (rm.controller.level == 0) { return 0 }
       if (rm.controller.Level == 8) { return 1 }
 
-      var energyPerTick = Math.floor(rm.energyProduction*0.8)
+      var energyPerTick = Math.floor(rm.energyProduction)
       var Upgrader = require('roles_upgrader')
       var parts = Upgrader.orderParts(rm, {})
       // essentially _.filter(p, p == WORK).length
       var numWorkParts = _.sum(parts, (p) => p === WORK ? 1 : 0)
       var numBuilders = rm.creepsByRole('builder').length
-      var numUpgraders = Math.floor(energyPerTick/numWorkParts) - numBuilders
+      var numUpgraders = Math.floor(energyPerTick * 0.8/numWorkParts) - numBuilders
 
       return _.max([1, numUpgraders])
     },
