@@ -99,7 +99,7 @@ const DISTRIBUTION = {
       if (rm.controller.level == 0) { return 0 }
       if (rm.controller.Level == 8) { return 1 }
 
-      var energyPerTick = rm.energyProduction
+      var energyPerTick = Math.floor(rm.energyProduction*0.8)
       var Upgrader = require('roles_upgrader')
       var parts = Upgrader.orderParts(rm, {})
       // essentially _.filter(p, p == WORK).length
