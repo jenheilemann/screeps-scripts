@@ -1,4 +1,3 @@
-if(Game.time % 13 == 3) { console.log(`CPU bucket: ${Game.cpu.bucket}`) }
 if (Game.cpu.bucket < 500) {
   throw new Error(`Extremely low bucket (${Game.cpu.bucket}) - aborting script run at top level`)
   return
