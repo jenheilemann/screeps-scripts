@@ -173,7 +173,6 @@ class Courier extends kernel.process {
   }
 
   park() {
-    var parkingSpot
     if (!this.creep.memory.parking) {
       this.launchChildProcess(`park`, 'creep_tasks_park', {
         cp: this.creep.name

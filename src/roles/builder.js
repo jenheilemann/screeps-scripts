@@ -36,47 +36,6 @@ class Builder extends WorkerCreep {
                      room.repairNeededBarriers().length
     return structures > 0 ? 1 : 0
   }
-
-  makeDecisions() {
-    if(this.memory.building && this.creep.carry.energy == 0) {
-      this.memory.reparable = null
-      this.memory.building = false
-    }
-    if(!this.memory.building && this.creep.isFull()) {
-      this.memory.building = true
-    }
-
-    if(this.memory.building) {
-      if (this.repair(this.room.rottingRamparts()) !== false) {
-        return
-      }
-      if (this.build() !== false) {
-        return
-      }
-
-      // towers can handle it
-      var towers = this.room.towers
-      if (towers.length > 0 && _.sum(towers, 'energy') > 100 ) {
-        return this.moveOffRoad()
-      }
-
-      if (this.repair(this.room.repairNeededStructures(0.95)) !== false) {
-        return
-      }
-      if (this.repair(this.room.repairNeededBarriers()) !== false) {
-        return
-      }
-      return this.moveOffRoad()
-    }
-
-    if (this.collect() === false ) {
-      if (!this.room.isEconomyWorking() ) {
-        return this.harvest()
-      }
-    }
-    this.moveOffRoad()
-  }
-
 }
 
 module.exports = Builder

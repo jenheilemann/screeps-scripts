@@ -35,11 +35,13 @@ class Move extends BaseTask {
 
     var pos = new RoomPosition(this.data.pos.x, this.data.pos.y, this.data.pos.r)
     var range = this.data.range ? this.data.range : 0
-
-    console.log("creep", this.data.cp, "pos", creep.pos, "goal", pos)
     if (creep.pos.inRangeTo(pos, range)) {
       this.suicide()
       return this.wakeParent()
+    }
+
+    if (creep.fatigue > 0) {
+      return
     }
 
     return creep.moveTo(pos, { visualizePathStyle: STYLE[this.data.style]})

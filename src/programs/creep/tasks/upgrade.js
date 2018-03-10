@@ -35,7 +35,7 @@ class Upgrade extends BaseTask {
       this.launchChildProcess(`move_to_controller`, 'creep_tasks_move', {
         cp:    this.data.cp,
         pos:   controller.pos.toHash(),
-        range: 3,
+        range: 2,
         style: 'upgrade'
       })
       var sleepFor = Math.floor(creep.pos.findPathTo(controller.pos).length*1.5)

@@ -52,7 +52,7 @@ class Upgrader extends kernel.process {
 
   harvest() {
     this.launchChildProcess(`harvest_energy`, 'creep_tasks_harvest', {
-      cp:  this.data.cp,
+      cp:  this.data.creep,
       src: this.source.id,
     })
     var sleepFor = creep.carryCapacity == 0 ? creep.ticksToLive : creep.ticksToFull
