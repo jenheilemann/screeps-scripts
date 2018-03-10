@@ -66,7 +66,7 @@ const DISTRIBUTION = {
   },
   courier: {
     goal: function(rm){
-      return rm.sourceContainers.length
+      return rm.sourceContainers.length * 2
     },
     max: 10,
     minExtensions: 0,
@@ -102,10 +102,11 @@ const DISTRIBUTION = {
       var energyPerTick = Math.floor(rm.energyProduction)
       var Upgrader = require('roles_upgrader')
       var parts = Upgrader.orderParts(rm, {})
-      // essentially _.filter(p, p == WORK).length
+      // essentially _.filter(p, p == WORK).length (work parts per upgrader)
       var numWorkParts = _.sum(parts, (p) => p === WORK ? 1 : 0)
       var numBuilders = rm.creepsByRole('builder').length
-      var numUpgraders = Math.floor(energyPerTick * 0.8/numWorkParts) - numBuilders
+      var numUpgraders = Math.floor(energyPerTick * 0.6/numWorkParts) - numBuilders
+      console.log('work parts', numWorkParts, 'builders', numBuilders, 'upgraders', numUpgraders)
 
       return _.max([1, numUpgraders])
     },
