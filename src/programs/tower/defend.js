@@ -24,7 +24,15 @@ class Defend extends kernel.process {
       return this.suicide()
     }
 
-    if (this.tower.pos.getRangeTo(closest) > TOWER_FALLOFF_RANGE) {
+    if (enemy.pos.onEdge) {
+      // don't drain
+      console.log('enemy on edge', enemy.pos)
+      this.wakeParent()
+      this.suicide()
+      return
+    }
+
+    if (this.tower.pos.getRangeTo(enemy) > TOWER_FALLOFF_RANGE) {
       this.wakeParent()
       return this.suicide()
     }

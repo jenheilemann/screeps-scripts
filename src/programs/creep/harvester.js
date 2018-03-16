@@ -22,7 +22,7 @@ class Harvester extends kernel.process {
     this.container = this.source.container()
     this.memory = this.creep.memory
 
-    this.makeDecisions();
+    this.makeDecisions()
     this.sleep(this.creep.ticksToLive)
   }
 

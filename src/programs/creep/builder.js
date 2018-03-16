@@ -17,6 +17,10 @@ class Builder extends kernel.process {
       return
     }
 
+    this.launchChildProcess(`cleanup`, 'creep_tasks_cleanup', {
+      cp: this.creep.name
+    })
+
     this.room = Game.rooms[this.creep.memory.colony]
     this.source = Game.getObjectById(this.creep.memory.source)
     this.container = Game.getObjectById(this.creep.memory.container)
@@ -35,22 +39,22 @@ class Builder extends kernel.process {
 
   buildAndRepair() {
     if (this.repair(this.room.rottingRamparts()) === true) {
-      return this.sleep(this.creep.ticksToLive)
+      return this.sleep(19)
     }
     if (this.build() === true) {
-      return this.sleep(this.creep.ticksToLive)
+      return this.sleep(19)
     }
 
     if (this.repair(this.room.repairNeededStructures(0.95)) === true) {
-      return this.sleep(this.creep.ticksToLive)
+      return this.sleep(19)
     }
     if (this.repair(this.room.repairNeededBarriers()) === true) {
-      return this.sleep(this.creep.ticksToLive)
+      return this.sleep(19)
     }
     return this.park()
   }
 
-  repair(structures) {
+  repair(structures, label) {
     // No repairable structures found
     if (structures.length == 0) {
       return false
@@ -62,6 +66,7 @@ class Builder extends kernel.process {
 
     if(repairable) {
       this.creep.memory.parking = false
+      this.killChild('repair_struture')
       this.launchChildProcess(`repair_struture`, 'creep_tasks_repair', {
         cp:     this.data.creep,
         target: repairable.id,

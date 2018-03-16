@@ -22,7 +22,7 @@ class Repair extends BaseTask {
 
     var target = Game.getObjectById(this.data.target)
 
-    if (!target) {
+    if (!target || target.hits === target.hitsMax) {
       this.wakeParent()
       this.suicide()
       return
@@ -44,4 +44,4 @@ class Repair extends BaseTask {
 }
 
 
-module.exports = Build
+module.exports = Repair

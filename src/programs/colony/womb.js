@@ -29,7 +29,7 @@ class Womb extends kernel.process {
       { room: this.data.room })
 
     if ( this.room.spawns[0].spawning != null ) {
-      return
+      return this.sleep(this.room.spawns[0].spawning.remainingTime )
     }
 
     if (!this.room.memory.nextCreep) {

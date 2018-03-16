@@ -13,7 +13,6 @@ class Harvest extends BaseTask {
       this.suicide()
       return
     }
-    Logger.debug(`Harvesting: ${creep.name}`)
 
     if (creep.numParts(CARRY) > 0 && creep.isFull()) {
       this.wakeParent()
@@ -30,7 +29,7 @@ class Harvest extends BaseTask {
         range: 1,
         style: 'harvest'
       })
-      var sleepFor = Math.floor(pos.findPathTo(source.pos).length*1.5)
+      var sleepFor = Math.floor(creep.pos.findPathTo(source.pos).length*1.5)
       return this.sleep(sleepFor)
     }
 

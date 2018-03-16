@@ -34,7 +34,7 @@ class FillCreep extends BaseTask {
         cp:    this.data.cp,
         pos:   container.pos.toHash(),
         range: 1,
-        style: 'courier'
+        style: 'collect'
       })
       // short sleep since the container can empty enroute
       return this.sleep(10)

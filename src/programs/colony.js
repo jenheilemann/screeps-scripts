@@ -28,6 +28,7 @@ class Colony extends kernel.process {
     if (this.room.spawns.length > 0) {
       this.launchChildProcess(`womb`, 'colony_womb', { room: this.data.room })
     }
+    this.sleep(11)
   }
 }
 

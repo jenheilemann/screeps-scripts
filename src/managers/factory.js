@@ -15,7 +15,7 @@ class CreepFactory {
 
     const klass = require(`roles_${this.role}`)
     var memory = klass.initializeMemory(this.room)
-    var name = this.role.substring(0,3) + this.room.name + Game.time
+    var name = this.role.substring(0,3) + (Game.time % 10000).toString(36)
     var parts = klass.orderParts(this.room, memory)
     var result = this.spawn.spawnCreep(parts, name, { memory: memory })
 

@@ -16,7 +16,8 @@ Object.defineProperties(Room.prototype, {
       })
 
       return sources
-    }
+    },
+    enumerable: false
   },
 
   constructionSites: {
@@ -26,10 +27,11 @@ Object.defineProperties(Room.prototype, {
       let refreshCache = false
 
       if (cached && !_.isEmpty(cached)) {
-        _.map(cached, function(id) {
+        _.each(cached, function(id) {
           var site = Game.getObjectById(id)
           if (site) {
             sites.push(site)
+            return
           }
           refreshCache = true
         })
@@ -44,35 +46,17 @@ Object.defineProperties(Room.prototype, {
       }
 
       return sites
-    }
+    },
+    enumerable: false
   },
 
   allStructures: {
     get: function () {
-      let cached = sos.lib.cache.get(`${this.name}.allStructures`)
-      let structures = []
-      let refreshCache = false
-
-      if (cached && !_.isEmpty(cached)) {
-        _.map(cached, function(id) {
-          var structure = Game.getObjectById(id)
-          if (structure) {
-            structures.push(structure)
-          }
-          refreshCache = true
-        })
-      }
-
-      if (_.isEmpty(structures) || refreshCache) {
-        structures = this.find(FIND_STRUCTURES)
-        sos.lib.cache.set(`${this.name}.allStructures`, _.map(structures, 'id'), {
-          maxttl: 179,
-          persist: true
-        })
-      }
-
-      return structures
-    }
+      return this.cache.remember('allStructures', function(self){
+        return self.find(FIND_STRUCTURES)
+      }, [this])
+    },
+    enumerable: false
   },
 
   structures: {
@@ -80,7 +64,8 @@ Object.defineProperties(Room.prototype, {
       return this.cache.remember('structures', function(self){
         return _.filter(self.allStructures, (s) => s.isActive() )
       }, [this])
-    }
+    },
+    enumerable: false
   },
 
   structuresByType: {
@@ -88,7 +73,8 @@ Object.defineProperties(Room.prototype, {
       return this.cache.remember('structuresByType', function(self){
         return _.groupBy(self.structures, 'structureType')
       }, [this])
-    }
+    },
+    enumerable: false
   },
 
   spawns: {
@@ -96,7 +82,8 @@ Object.defineProperties(Room.prototype, {
       return this.cache.remember('spanws', function(self){
         return self.structuresByType[STRUCTURE_SPAWN] || []
       }, [this])
-    }
+    },
+    enumerable: false
   },
 
   extensions: {
@@ -104,7 +91,8 @@ Object.defineProperties(Room.prototype, {
       return this.cache.remember('extensions', function(self){
         return self.structuresByType[STRUCTURE_EXTENSION] || []
       }, [this])
-    }
+    },
+    enumerable: false
   },
 
   containers: {
@@ -112,7 +100,8 @@ Object.defineProperties(Room.prototype, {
       return this.cache.remember('containers', function(self){
         return self.structuresByType[STRUCTURE_CONTAINER] || []
       }, [this])
-    }
+    },
+    enumerable: false
   },
 
   sourceContainers: {
@@ -120,7 +109,8 @@ Object.defineProperties(Room.prototype, {
       return this.cache.remember('sourceContainers', function(sources){
         return _.filter(_.map(sources, (s) => s.container()), (c) => c.exists())
       }, [this.sources]);
-    }
+    },
+    enumerable: false
   },
 
   openContainers: {
@@ -128,7 +118,8 @@ Object.defineProperties(Room.prototype, {
       return this.cache.remember('openContainers', function(containers, sContainers){
         return _.difference(containers, sContainers)
       }, [this.containers, this.sourceContainers]);
-    }
+    },
+    enumerable: false
   },
 
   towers: {
@@ -136,7 +127,8 @@ Object.defineProperties(Room.prototype, {
       return this.cache.remember('towers', function(self){
         return self.structuresByType[STRUCTURE_TOWER] || []
       }, [this])
-    }
+    },
+    enumerable: false
   },
 
   barriers: {
@@ -146,8 +138,30 @@ Object.defineProperties(Room.prototype, {
         var walls = self.structuresByType[STRUCTURE_WALL] || []
         return ramparts.concat(walls)
       }, [this])
-    }
-  }
+    },
+    enumerable: false
+  },
+
+  hidingSpots: {
+    get: function() {
+      return this.cache.remember('hidingSpots', function(self){
+        let ramparts = self.structuresByType[STRUCTURE_RAMPART] || []
+        return _.filter(ramparts, (r) => {
+          let structures = self.lookForAt(LOOK_STRUCTURES, r)
+          // the only structure is the rampart
+          if (structures.length == 1) {
+            return true
+          }
+          return !_.any(structures, (o) => {
+            return o.structureType !== STRUCTURE_ROAD &&
+                   o.structureType !== STRUCTURE_RAMPART &&
+                   o.structureType !== STRUCTURE_CONTAINER
+          })
+        })
+      }, [this])
+    },
+    enumerable: false
+  },
 })
 
 Room.prototype.repairNeededStructures = function(percent = 0.8) {

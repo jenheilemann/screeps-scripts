@@ -176,6 +176,15 @@ class Process {
     }
   }
 
+  infanticide() {
+    if (!this.data.children) {
+      return
+    }
+    _.forEach(this.data.children, function(child){
+      kernel.scheduler.kill(child)
+    })
+  }
+
   suicide () {
     this.alive = false
     let label

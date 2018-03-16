@@ -17,25 +17,35 @@ class Upgrader extends kernel.process {
       return
     }
 
+    this.launchChildProcess(`cleanup`, 'creep_tasks_cleanup', {
+      cp: this.creep.name
+    })
+
     this.room = Game.rooms[this.creep.memory.colony]
     this.source = Game.getObjectById(this.creep.memory.source)
     this.container = Game.getObjectById(this.creep.memory.container)
 
     this.makeDecisions()
-    this.sleep(this.creep.ticksToLive)
   }
 
   makeDecisions() {
+    if (this.room.defcon.level > 0) {
+      this.infanticide()
+      this.hide()
+      return this.sleep(Math.min(this.creep.ticksToLive, 13))
+    }
     if (this.creep.isEmpty()) {
       if (this.collect() === false ) {
         if (!this.room.isEconomyWorking() ) {
-          return this.harvest()
+          this.harvest()
         }
+        this.sleep(Math.min(this.creep.ticksToLive, 5))
       }
       return
     }
 
     this.upgrade()
+    this.sleep(Math.min(this.creep.ticksToLive, 5))
   }
 
   collect() {
@@ -55,14 +65,18 @@ class Upgrader extends kernel.process {
       cp:  this.data.creep,
       src: this.source.id,
     })
-    var sleepFor = creep.carryCapacity == 0 ? creep.ticksToLive : creep.ticksToFull
-    return this.sleep(sleepFor)
   }
 
   upgrade() {
     this.launchChildProcess(`creep_upgrade`, 'creep_tasks_upgrade', {
       cp: this.creep.name,
       id: this.room.controller.id
+    })
+  }
+
+  hide() {
+    this.launchChildProcess(`hide`, `creep_tasks_hunker`, {
+      cp: this.creep.name
     })
   }
 }

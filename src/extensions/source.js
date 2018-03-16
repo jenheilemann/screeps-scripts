@@ -8,7 +8,7 @@ Source.prototype.container = function () {
   if (typeof(this.memory.container) != 'string' && Game.time - this.memory.containerSearch > 17) {
     this.memory.containerSearch = Game.time
     containers = this.room.containers
-    container = pos.findClosestByRange(containers, { filter: (c) => pos.isNearTo(c) })[0]
+    container = pos.findClosestByRange(containers, { filter: (c) => pos.isNearTo(c) })
     if (container) {
       this.memory.container = container.id
     }

@@ -17,6 +17,10 @@ class Courier extends kernel.process {
       return
     }
 
+    this.launchChildProcess(`cleanup`, 'creep_tasks_cleanup', {
+      cp: this.creep.name
+    })
+
     this.room = Game.rooms[this.creep.memory.colony]
     this.source = Game.getObjectById(this.creep.memory.source)
     this.container = Game.getObjectById(this.creep.memory.container)
@@ -26,14 +30,24 @@ class Courier extends kernel.process {
 
   makeDecisions() {
     if (this.creep.isEmpty()) {
+      if (this.getEnergy() === true) {
+        this.creep.memory.parking = false
+        this.killChild('park')
+        return this.sleep(this.creep.ticksToLive)
+      }
+      return this.park()
+    }
+
+    if (this.deliverEnergy() === true){
       this.creep.memory.parking = false
-      this.getEnergy()
+      this.killChild('park')
       this.sleep(this.creep.ticksToLive)
       return
     }
 
-    if (this.deliverEnergy() !== false){
+    if (this.deliverResources() === true) {
       this.creep.memory.parking = false
+      this.killChild('park')
       this.sleep(this.creep.ticksToLive)
       return
     }
@@ -46,13 +60,14 @@ class Courier extends kernel.process {
       return this.gatherDropped(dropped)
     }
 
-    if (this.collectAny() !== false) {
-      return
+    if (this.collectAny() === true) {
+      return true
     }
 
     if (this._canArriveInTime(dropped) ) {
       return this.gatherDropped(dropped)
     }
+    return false
   }
 
   gatherDropped(resource) {
@@ -60,6 +75,7 @@ class Courier extends kernel.process {
       cp:      this.creep.name,
       target:  resource.id
     })
+    return true
   }
 
   _canArriveInTime(resource) {
@@ -69,7 +85,7 @@ class Courier extends kernel.process {
   collectAny() {
     var container = this.container
     if (!container || container.store.energy < 50) {
-      container = _.max(this.room.containers, (c) => c.store.energy )
+      container = _.max(this.room.sourceContainers, (c) => c.store.energy )
       if (!container || container.store.energy < 50) {
         return false
       }
@@ -80,9 +96,14 @@ class Courier extends kernel.process {
       from: container.id,
       resource: RESOURCE_ENERGY
     })
+    return true
   }
 
   deliverEnergy() {
+    if (this.creep.carry.energy === 0) {
+      return false
+    }
+
     // prioritize towers in emergencies!
     if (this.room.defcon.level > 0 && this.refillTowers(0.8) !== false ) {
       return true
@@ -97,13 +118,32 @@ class Courier extends kernel.process {
     if (this.refillOpenContainers() !== false ) {
       return true
     }
-    if (this.refillTowers(1) !== false ) {
+    if (this.refillTowers(0.81) !== false ) {
       return true
     }
     if (this.refillStorage() !== false ) {
       return true
     }
     return false
+  }
+
+  deliverResources() {
+    if (this.creep.isEmpty() || _.sum(this.creep.carry) === this.creep.carry.energy ) {
+      return false
+    }
+
+    let storage = this.room.storage
+
+    if (!storage) {
+      return false
+    }
+
+    this.launchChildProcess(`refill`, 'creep_tasks_fill_object', {
+      cp: this.creep.name,
+      to: storage.id,
+      resource: _.last(Object.keys(this.creep.carry))
+    })
+    return true
   }
 
   refillSpawns() {
@@ -158,7 +198,7 @@ class Courier extends kernel.process {
 
     var available = this.container.store.energy
     if (available >= this.creep.carryCapacity*2 ||
-        available > this.container.storeCapacity) {
+        available >= this.container.storeCapacity) {
       return this._refill(storage)
     }
     return false

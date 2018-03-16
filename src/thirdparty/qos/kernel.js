@@ -46,6 +46,9 @@ class QosKernel {
     if (this.newglobal) {
       Logger.info(`New Global Detected`)
     }
+    if (typeof Game.cpu.getHeapStatistics === "function") {
+      Logger.debug(`IVM Uptime: ${Game.time - GLOBAL_LAST_RESET}`)
+    }
 
     sos.lib.segments.moveToGlobalCache()
     sos.lib.stormtracker.track()
@@ -188,6 +191,16 @@ class QosKernel {
     return this._cpuLimit
   }
 
+  getHeapUsage() {
+    let heapStats = Game.cpu.getHeapStatistics()
+    let gross = heapStats.total_heap_size + heapStats.externally_allocated_size
+    let heapPercent = ((gross / heapStats.heap_size_limit) * 100).toFixed(2)
+    return `${((heapStats.total_heap_size)/1048576).toFixed(2)}MB + ` +
+          `${((heapStats.externally_allocated_size)/1048576).toFixed(2)}MB of ` +
+          `${Math.round(heapStats.heap_size_limit/1048576)}MB `+
+          `( ${heapPercent}% )`
+  }
+
   shutdown () {
     sos.lib.vram.saveDirty()
     sos.lib.segments.process()
@@ -196,12 +209,14 @@ class QosKernel {
     const completedCount = this.scheduler.getCompletedProcessCount()
     const processCount = this.scheduler.getProcessCount()
 
-    Logger.info(`Processes Run: ${completedCount}/${processCount}`, 'kernel')
-    Logger.info(`Tick Limit: ${Game.cpu.tickLimit}`, 'kernel')
-    Logger.info(`Kernel Limit: ${this.getCpuLimit()}`, 'kernel')
+    Logger.debug(`Processes Run: ${completedCount}/${processCount}`, 'kernel')
+    Logger.debug(`Tick Limit: ${Game.cpu.tickLimit}`, 'kernel')
+    Logger.debug(`Kernel Limit: ${this.getCpuLimit()}`, 'kernel')
     Logger.info(`CPU Used: ${Game.cpu.getUsed()}`, 'kernel')
-    Logger.info(`Bucket: ${Game.cpu.bucket}`, 'kernel')
-
+    Logger.debug(`Bucket: ${Game.cpu.bucket}`, 'kernel')
+    if (typeof Game.cpu.getHeapStatistics === "function") {
+      Logger.info(`Heap usage: ${this.getHeapUsage()}`, 'kernel')
+    }
     if (Game.time % 50 === 0) {
       this.performance.reportHtml()
     }

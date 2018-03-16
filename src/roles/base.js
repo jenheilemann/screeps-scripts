@@ -115,9 +115,8 @@ class BaseRole {
 
   collect() {
     var container = this.container
-    var trunkSpace = this.creep.carryCapacity - _.sum(this.creep.carry)
 
-    if (!container || container.store[RESOURCE_ENERGY] < trunkSpace) {
+    if (!container || container.store[RESOURCE_ENERGY] < this.creep.trunkSpace) {
       return false
     }
 
@@ -129,7 +128,6 @@ class BaseRole {
 
   collectAny() {
     var container = this.container
-    var trunkSpace = this.creep.carryCapacity - _.sum(this.creep.carry)
 
     if (!container || container.store.energy < 50) {
       container = _.max(this.room.containers, (c) => container.store.energy)

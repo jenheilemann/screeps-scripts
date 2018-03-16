@@ -15,9 +15,9 @@ class Worker extends BaseRole {
 
   static _findContainerWithOpenSpot(source_id, room) {
     // containers next to sources
-    var sourceContainers = _.map(room.sources, (s) => s.container() )
+    var sourceContainers = room.sourceContainers
     // containers NOT next to sources, we want to prefer these
-    var openContainers = _.filter(room.containers, (c) => !sourceContainers.includes(c))
+    var openContainers = room.openContainers
 
     if (openContainers.length > 0) {
       var creeps = this.similarCreeps(room)

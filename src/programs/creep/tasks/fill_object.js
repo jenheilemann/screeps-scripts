@@ -14,7 +14,7 @@ class FillObject extends BaseTask {
       return
     }
 
-    if (creep.isEmpty()) {
+    if (creep.isEmpty() || creep.carry[this.data.resource] === 0) {
       this.wakeParent()
       this.suicide()
       return
