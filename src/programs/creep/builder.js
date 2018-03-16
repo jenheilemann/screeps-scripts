@@ -30,6 +30,12 @@ class Builder extends kernel.process {
   }
 
   makeDecisions() {
+    if (this.room.defcon.level > 0) {
+      this.infanticide(['hide', 'cleanup'])
+      this.hide()
+      return this.sleep(Math.min(this.creep.ticksToLive, 13))
+    }
+
     if (this.creep.isEmpty()) {
       this.getEnergy()
       return
