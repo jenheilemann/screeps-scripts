@@ -15,7 +15,7 @@ class Hunker extends BaseTask {
       return
     }
 
-    this.room = Game.rooms[this.creep.memory.colony]
+    this.room = Game.rooms[this.data.room]
     if (this.room.defcon.level === 0) {
       delete this.creep.memory.hiding
       this.wakeParent()
@@ -25,21 +25,19 @@ class Hunker extends BaseTask {
 
     let rampart = Game.getObjectById(this.data.rampart)
     if (!rampart || this.rampartIsOccupied(rampart)) {
-      console.log('finding rampart')
+      this.killChild('move_to_rampart')
       let ramparts = _.filter(this.room.hidingSpots,
         (r) => this.room.lookForAt(LOOK_CREEPS, r).length === 0)
 
       if (ramparts.length === 0) {
-        // this.launchChildProcess(`run_away`, 'creep_tasks_flee', {
-        //   cp:    this.data.cp,
-        // })
-        console.log('run away!')
-        this.creep.say('AHHH!', true)
+        this.launchChildProcess(`run_away`, 'creep_tasks_flee', {
+          cp:    this.data.cp,
+          room:  this.creep.room.name,
+        })
         return
       }
       rampart = this.creep.pos.findClosestByPath(ramparts)
       this.data.rampart = rampart.id
-      console.log('rampart chosen', rampart.id)
     }
 
     // this.killChild('run_away')
@@ -50,13 +48,11 @@ class Hunker extends BaseTask {
         range: 0,
         style: 'run'
       })
-      console.log('moving to rampart')
       return
     }
 
     if (this.creep.memory.hiding === true) {
-      console.log('hiding!')
-      this.creep.say(`Shhhhh`)
+      this.creep.say(`Shhhhh`, true)
       return this.sleep(5)
     }
 
@@ -67,14 +63,11 @@ class Hunker extends BaseTask {
   rampartIsOccupied(rampart) {
     let creeps = this.room.lookForAt(LOOK_CREEPS, rampart)
     if (creeps.length == 0) {
-      console.log('no creeps on rampart')
       return false
     }
     if (creeps[0].name == this.creep.name) {
-      console.log('I am on the rampart!')
       return false
     }
-    console.log('Somebody else is on the rampart', creeps[0].name)
     return true
   }
 }

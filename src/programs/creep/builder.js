@@ -18,14 +18,15 @@ class Builder extends kernel.process {
     }
 
     this.launchChildProcess(`cleanup`, 'creep_tasks_cleanup', {
-      cp: this.creep.name
+      cp: this.creep.name,
+      r:  false
     })
 
     this.room = Game.rooms[this.creep.memory.colony]
     this.source = Game.getObjectById(this.creep.memory.source)
     this.container = Game.getObjectById(this.creep.memory.container)
 
-    this.makeDecisions();
+    this.makeDecisions()
   }
 
   makeDecisions() {
@@ -67,6 +68,7 @@ class Builder extends kernel.process {
     if(repairable) {
       this.creep.memory.parking = false
       this.killChild('repair_struture')
+      this.killChild('build_struture')
       this.launchChildProcess(`repair_struture`, 'creep_tasks_repair', {
         cp:     this.data.creep,
         target: repairable.id,
@@ -83,6 +85,7 @@ class Builder extends kernel.process {
     // build non-road stuff, probably more important
     if(nonRoad.length > 0) {
       this.creep.memory.parking = false
+      this.killChild('repair_struture')
       this.launchChildProcess(`build_struture`, 'creep_tasks_build', {
         cp:   this.data.creep,
         site: nonRoad[0].id,
@@ -94,6 +97,7 @@ class Builder extends kernel.process {
     var roads = targets.filter((c) => c.structureType == STRUCTURE_ROAD)
     if(roads.length > 0) {
       this.creep.memory.parking = false
+      this.killChild('repair_struture')
       this.launchChildProcess(`build_road`, 'creep_tasks_build', {
         cp:   this.data.creep,
         site: roads[0].id,

@@ -18,7 +18,8 @@ class Courier extends kernel.process {
     }
 
     this.launchChildProcess(`cleanup`, 'creep_tasks_cleanup', {
-      cp: this.creep.name
+      cp: this.creep.name,
+      r:  true
     })
 
     this.room = Game.rooms[this.creep.memory.colony]

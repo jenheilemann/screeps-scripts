@@ -176,12 +176,15 @@ class Process {
     }
   }
 
-  infanticide() {
+  infanticide(favorites = []) {
     if (!this.data.children) {
       return
     }
-    _.forEach(this.data.children, function(child){
-      kernel.scheduler.kill(child)
+    _.forEach(this.data.children, function(v, label, children){
+      if (favorites.includes(label)) {
+        return
+      }
+      kernel.scheduler.kill(children[label])
     })
   }
 

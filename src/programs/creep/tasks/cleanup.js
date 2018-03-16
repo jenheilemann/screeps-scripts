@@ -23,7 +23,7 @@ class CleanUp extends BaseTask {
       return this.sleep(7)
     }
 
-    var resource = this.findResource()
+    let resource = this.findResource()
     if ( resource ) {
       this.creep.pickup(resource)
       if (resource.amount >= this.creep.trunkSpace) {
@@ -33,9 +33,9 @@ class CleanUp extends BaseTask {
       return this.sleep(3)
     }
 
-    var tombstone = this.findTombstone()
+    let tombstone = this.findTombstone()
     if ( tombstone ) {
-      var rType = _.last(Object.keys(tombstone.store))
+      let rType = this.data.r ? _.last(Object.keys(tombstone.store)) : RESOURCE_ENERGY
       this.creep.withdraw(tombstone, rType)
       if (tombstone.store[rType] >= this.creep.trunkSpace) {
         this.wakeParent()

@@ -18,7 +18,8 @@ class Upgrader extends kernel.process {
     }
 
     this.launchChildProcess(`cleanup`, 'creep_tasks_cleanup', {
-      cp: this.creep.name
+      cp: this.creep.name,
+      r:  false
     })
 
     this.room = Game.rooms[this.creep.memory.colony]
@@ -30,7 +31,7 @@ class Upgrader extends kernel.process {
 
   makeDecisions() {
     if (this.room.defcon.level > 0) {
-      this.infanticide()
+      this.infanticide(['hide', 'cleanup'])
       this.hide()
       return this.sleep(Math.min(this.creep.ticksToLive, 13))
     }
@@ -39,9 +40,8 @@ class Upgrader extends kernel.process {
         if (!this.room.isEconomyWorking() ) {
           this.harvest()
         }
-        this.sleep(Math.min(this.creep.ticksToLive, 5))
       }
-      return
+      return this.sleep(Math.min(this.creep.ticksToLive, 5))
     }
 
     this.upgrade()
@@ -76,7 +76,8 @@ class Upgrader extends kernel.process {
 
   hide() {
     this.launchChildProcess(`hide`, `creep_tasks_hunker`, {
-      cp: this.creep.name
+      cp: this.creep.name,
+      room: this.room.name
     })
   }
 }

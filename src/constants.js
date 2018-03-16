@@ -42,3 +42,19 @@ global.MONITOR_PRIORITIES = _.uniq([
   PRIORITIES_DEFAULT,
   9
 ])
+
+// Line styles for showing what action a creep is taking
+global.CREEP_MOVE_STYLE = {
+  move:    {stroke: '#ffffff', strokeWidth: 0.1, opacity: 0.6},
+  collect: {stroke: '#ff3366', strokeWidth: 0.1, opacity: 0.6},
+  harvest: {stroke: '#ffbb33', strokeWidth: 0.1, opacity: 0.6},
+  build:   {stroke: '#aaccff', strokeWidth: 0.1, opacity: 0.6},
+  upgrade: {stroke: '#55ff55', strokeWidth: 0.1, opacity: 0.6},
+  courier: {stroke: '#ffaaff', strokeWidth: 0.1, opacity: 0.6},
+  repair:  {stroke: '#aaaaff', strokeWidth: 0.1, opacity: 0.6},
+  renew:   {stroke: '#aaaaff', strokeWidth: 0.1, opacity: 0.6},
+  recycle: {stroke: '#aaaaff', strokeWidth: 0.1, opacity: 0.6},
+  pickup:  {stroke: '#ffddbb', strokeWidth: 0.1, opacity: 0.6},
+  run:     {stroke: '#ff0000', strokeWidth: 0.15, opacity: 0.7, lineStyle: 'dotted'},
+  flee:    {stroke: '#00ff00', strokeWidth: 0.15, opacity: 0.7, lineStyle: 'dotted'}
+}

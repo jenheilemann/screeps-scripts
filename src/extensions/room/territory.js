@@ -34,3 +34,16 @@ Room.removeColony = function (roomName) {
     Logger.log(`Removing colony ${roomName}`)
   }
 }
+
+Object.defineProperties(Room.prototype, {
+  safeNeighbors: {
+    get: function () {
+      return this.cache.remember('safeNeighbors', function(self){
+        let exits = Game.map.describeExits(self.name)
+        let collection = []
+        _.map(exits, (v, k) => collection.push({roomName: v, direction: k}))
+        return collection
+      }, [this])
+    }
+  }
+})

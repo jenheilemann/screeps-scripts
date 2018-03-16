@@ -43,7 +43,7 @@ class Upgrade extends BaseTask {
     }
 
     if (result !== OK) {
-      console.log(this.data.cp, "Attempting to upgrade controller, but Error Code: ", result)
+      Logger.error(`${this.data.cp}, Attempting to upgrade controller, but Error Code: ${result}`)
     }
   }
 }
