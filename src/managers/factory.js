@@ -14,16 +14,20 @@ class CreepFactory {
     }
 
     const klass = require(`roles_${this.role}`)
-    var memory = klass.initializeMemory(this.room)
-    var name = this.role.substring(0,3) + (Game.time % 10000).toString(36)
-    var parts = klass.orderParts(this.room, memory)
-    var result = this.spawn.spawnCreep(parts, name, { memory: memory })
+    let memory = klass.initializeMemory(this.room)
+    let parts = klass.orderParts(this.room, memory)
+    let name = this.generateName()
+    let result = this.spawn.spawnCreep(parts, name, { memory: memory })
 
     if (result == OK) {
       console.log('Spawning creep: ', this.role, name )
       return true
     }
     return false
+  }
+
+  generateName() {
+    return `${this.role.substring(0,3)}-${(Game.time % 10000).toString(36)}`
   }
 }
 
