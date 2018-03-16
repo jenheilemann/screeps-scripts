@@ -7,17 +7,16 @@ class PopulationManager {
   }
 
   neededRole() {
-    var self = this
-    var rm = this.room
-    var numExtensions = rm.extensions.length
-    var total
+    let self = this
+    let rm = this.room
+    let numExtensions = rm.extensions.length
 
-    var needed = _.filter(Object.keys(DISTRIBUTION), function(role) {
+    let needed = _.filter(Object.keys(DISTRIBUTION), function(role) {
       if (DISTRIBUTION[role].minExtensions > numExtensions) {
         return false
       }
 
-      total = rm.creepsByRole(role).length
+      let total = rm.creepsByRole(role).length
       if ( total >= self.goalByRole(role) ) {
         return false
       }
@@ -31,11 +30,9 @@ class PopulationManager {
       return false
     }
 
-    var max = _.max(needed, function(role){
+    return _.max(needed, function(role){
       return DISTRIBUTION[role].priority(rm)
-    });
-
-    return max
+    })
   }
 
   goalByRole(role) {
@@ -96,19 +93,8 @@ const DISTRIBUTION = {
   },
   upgrader:  {
     goal: function(rm) {
-      if (rm.defcon.level > 0)      { return 0 }
-      if (rm.controller.level == 0) { return 0 }
-      if (rm.controller.Level == 8) { return 1 }
-
-      var energyPerTick = Math.floor(rm.energyProduction)
       var Upgrader = require('roles_upgrader')
-      var parts = Upgrader.orderParts(rm, {})
-      // essentially _.filter(p, p == WORK).length (work parts per upgrader)
-      var numWorkParts = _.sum(parts, (p) => p === WORK ? 1 : 0)
-      var numBuilders = rm.creepsByRole('builder').length
-      var numUpgraders = Math.floor(energyPerTick * 0.6/numWorkParts) - numBuilders
-
-      return _.max([1, numUpgraders])
+      return Upgrader.goalPopulation(rm)
     },
     max: 5,
     minExtensions: 0,
