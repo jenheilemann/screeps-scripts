@@ -6,7 +6,7 @@
 
 class Builder extends kernel.process {
   main () {
-    this.creep = Game.creeps[this.data.creep]
+    this.creep = Game.creeps[this.data.cp]
 
     if (!this.creep) {
       this.suicide()
@@ -76,7 +76,7 @@ class Builder extends kernel.process {
       this.killChild('repair_struture')
       this.killChild('build_struture')
       this.launchChildProcess(`repair_struture`, 'creep_tasks_repair', {
-        cp:     this.data.creep,
+        cp:     this.data.cp,
         target: repairable.id,
       })
       return true
@@ -93,7 +93,7 @@ class Builder extends kernel.process {
       this.creep.memory.parking = false
       this.killChild('repair_struture')
       this.launchChildProcess(`build_struture`, 'creep_tasks_build', {
-        cp:   this.data.creep,
+        cp:   this.data.cp,
         site: nonRoad[0].id,
       })
       return true
@@ -105,7 +105,7 @@ class Builder extends kernel.process {
       this.creep.memory.parking = false
       this.killChild('repair_struture')
       this.launchChildProcess(`build_road`, 'creep_tasks_build', {
-        cp:   this.data.creep,
+        cp:   this.data.cp,
         site: roads[0].id,
       })
       return true
@@ -141,7 +141,7 @@ class Builder extends kernel.process {
 
   harvest() {
     this.launchChildProcess(`harvest_energy`, 'creep_tasks_harvest', {
-      cp:  this.data.creep,
+      cp:  this.data.cp,
       src: this.source.id,
     })
   }

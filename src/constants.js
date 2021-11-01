@@ -1,7 +1,57 @@
+if (!Memory.username) {
+  const struc = _.find(Game.structures)
+  const creep = _.find(Game.creeps)
+  Memory.username = (struc ? struc.owner.username : false) || (creep ? creep.owner.username : false)
+}
+global.USERNAME = Memory.username
+
 global.ONE_MILLION = 1000000
 global.THREE_HUNDRED_MILLION = 300000000
 global.STRUCTURE_BARRIER = [STRUCTURE_WALL, STRUCTURE_RAMPART]
 global.TOWER_ATTACK_RANGE = Math.floor((TOWER_OPTIMAL_RANGE + TOWER_FALLOFF_RANGE)/2)
+// A little more than a day if tick lengths are ~3.5 seconds
+global.ONE_DAY = 29443
+global.ONE_WEEK = 172801
+
+global.ROOM_TYPES = {
+  Normal: 0,        // Controller, settle-able
+  Highway: 1,       // empty, between sectors
+  Intersection: 2,  // cross of highways, contains terminal
+  SourceKeeper: 3,  // eight central rooms of a sector, source keeper rooms
+  Center: 4         // exact center of a sector, three sources, no controller
+}
+
+global.SHORT_STRUCTURE_TYPES = {
+  spawn:           0,
+  extension:       1,
+  road:            2,
+  constructedWall: 3,
+  rampart:         4,
+  keeperLair:      5,
+  portal:          6,
+  controller:      7,
+  link:            8,
+  storage:         9,
+  tower:           10,
+  observer:        11,
+  powerBank:       12,
+  powerSpawn:      13,
+  extractor:       14,
+  lab:             15,
+  terminal:        16,
+  container:       17,
+  nuker:           18,
+}
+
+global.UNOWNABLE_STRUCTURE_TYPES = [STRUCTURE_ROAD, STRUCTURE_WALL, STRUCTURE_CONTAINER]
+
+global.REPAIR_PRIORITIES = {
+  Rotting_Rampart: 100,
+  Dying_Structure: 80,
+  Dying_Barrier: 60,
+  Structure: 40,
+  Barrier: 20
+}
 
 global.PRIORITIES_DEFAULT = 6
 
@@ -11,6 +61,7 @@ global.PRIORITIES_CREEP_UPGRADER = 6
 global.PRIORITIES_FORTIFY = 6
 global.PRIORITIES_MINE = 6
 global.PRIORITIES_CREEP_CLEAN = 8
+global.PRIORITIES_CREEP_WHISTLE = 16
 
 global.PRIORITIES_SPAWNS = 3
 global.PRIORITIES_DEFENSE = 3
@@ -56,5 +107,6 @@ global.CREEP_MOVE_STYLE = {
   recycle: {stroke: '#aaaaff', strokeWidth: 0.1, opacity: 0.6},
   pickup:  {stroke: '#ffddbb', strokeWidth: 0.1, opacity: 0.6},
   run:     {stroke: '#ff0000', strokeWidth: 0.15, opacity: 0.7, lineStyle: 'dotted'},
-  flee:    {stroke: '#00ff00', strokeWidth: 0.15, opacity: 0.7, lineStyle: 'dotted'}
+  flee:    {stroke: '#00ff00', strokeWidth: 0.15, opacity: 0.7, lineStyle: 'dotted'},
+  scout:   {stroke: '#3333ff', strokeWidth: 0.10, opacity: 0.7, lineStyle: 'dotted'}
 }

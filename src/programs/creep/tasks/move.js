@@ -31,7 +31,7 @@ class Move extends BaseTask {
     }
 
     if (this.creep.room.name !== this.pos.roomName) {
-      console.log('moving to new room', this.creep, this.pos.roomName)
+      Logger.audit(`${this.creep} moving to new room room ${this.pos.roomName}`)
       this.navToRoom()
       this.sleep(17)
       return
@@ -49,16 +49,18 @@ class Move extends BaseTask {
         second = RoomPosition.fromHash(this.data.c),
         last = RoomPosition.fromHash(this.data.b)
     if (this.creep.pos.isEqualTo(second) && second.isEqualTo(last)) {
-      console.log(this.creep, 'is stuck!')
+      Logger.audit(`${this.creep} is stuck!`)
       stuck = true
       delete this.creep.memory._path
     }
     let maxRooms = this.data.maxRooms ? this.data.maxRooms : 1
+    let ignoreRoads = typeof(this.data.ignoreRoads) == 'undefined' ? false : this.data.ignoreRoads
 
     let result = this.creep.moveTo(this.pos, {
       visualizePathStyle: CREEP_MOVE_STYLE[this.data.style],
       reusePath: stuck ? 5 : 20,
       ignoreCreeps: !stuck,
+      ignoreRoads: ignoreRoads,
       maxOps: 1000,
       maxRooms: maxRooms,
       range: this.range

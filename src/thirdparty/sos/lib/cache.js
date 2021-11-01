@@ -21,7 +21,9 @@ cache.get = function (label, opts) {
 
   opts = Object.assign({}, defaultOpts, opts);
 
-  if(opts.ttl && opts.chance < 1) {
+  if (opts.refresh === false) {
+    var allow_refresh = false
+  } else if(opts.ttl && opts.chance < 1) {
     var allow_refresh = Math.random() <= opts.chance
   } else {
     var allow_refresh = true
@@ -48,27 +50,15 @@ cache.get = function (label, opts) {
     return
   }
 
-
   // Memory Cache
   var item = _.get(Memory.sos.cache, label, undefined)
-  //var item = !!Memory.sos.cache[label] ? Memory.sos.cache[label] : false
-  if(!!item) {
-    if(!!item.exp) {
-      if(item.exp < Game.time) {
-        //delete Memory.sos.cache[label]
-        _.set(Memory.sos.cache, label, undefined)
-        return
-      }
-    }
+  if(!!item && !!item.exp && item.exp < Game.time) {
+    return
   }
-
-
-  var item = _.get(Memory.sos.cache, label, undefined)
-  //var item = !!Memory.sos.cache[label] ? Memory.sos.cache[label] : false
 
   if(!!item) {
     // Advance "lu" cache time
-    var lu = Game.time + opts. lastuse
+    var lu = Game.time + opts.lastuse
     if(item.lu != lu) {
       item.lu = Game.time + opts.lastuse
       _.set(Memory.sos.cache, label, item)
@@ -159,32 +149,26 @@ cache.clean = function () {
   for(var label in Memory.sos.cache) {
     this.__cleankey(Memory.sos.cache, label)
   }
-
 }
 
 cache.__cleankey = function (object, key) {
-
   if(object[key].tick) {
-    if(object[key].exp && object[key].exp < Game.time) {
-      delete object[key]
-    } else if(object[key].lu && object[key].lu < Game.time) {
-      delete object[key]
+    if(object[key].exp) {
+      if (object[key].exp < Game.time) {
+        delete object[key]
+      }
+    } else if(object[key].lu) {
+      if (object[key].lu < Game.time) {
+        delete object[key]
+      }
     }
   } else {
     for(var label in object[key]) {
       if(object[key][label]) {
-        if(object[key][label].tick) {
-          if(object[key][label] && object[key][label].exp && object[key][label].exp < Game.time) {
-            delete object[key][label]
-          } else if(object[key][label] && object[key][label].lu && object[key][label].lu < Game.time) {
-            delete object[key][label]
-          }
-        } else {
-          this.__cleankey(object[key], label)
-        }
+        this.__cleankey(object[key], label)
       }
     }
-    if(Object.keys(object[key]).length < 0) {
+    if(Object.keys(object[key]).length <= 0) {
       delete object[key]
     }
   }

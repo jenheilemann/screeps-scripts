@@ -12,112 +12,80 @@ class Commander extends kernel.process {
   }
 
   main () {
-    this.tower = Game.getObjectById(this.data.tower)
-    if (!this.tower) {
-      return this.suicide()
-    }
-
-    if (this.tower.energy == 0) {
+    this.room = Game.rooms[this.data.room]
+    if (!this.room) {
+      this.suicide()
       return
     }
 
-    this.room = this.tower.room
-    // reset the repair child, since it's valueable to re-focus every so often
-    this.killChild('repair')
+    this.enemies = _.filter(this.room.enemies, (e) => !e.pos.onEdge )
+    this.hurt = _.filter(this.room.friendlies, (c) => c.hits < c.hitsMax)
 
-    var enemies = this.room.enemies
-    if (enemies.length > 0 && this.attack(enemies) === true) {
-      return
-    }
-
-    if (this.heal() === true) {
-      return this.sleep(5)
-    }
-    if (this.repair(this.room.rottingRamparts) === true) {
-      return this.sleep(5)
+    let towers = this.room.towers
+    for (let i in towers) {
+      this.run(towers[i])
     }
 
-    if (this.tower.energy/this.tower.energyCapacity < 0.5) {
-      // save for emergencies
-      return this.sleep(5)
+    if (this.enemies.length == 0 && this.hurt.length == 0) {
+      this.repair()
     }
-
-    if (this.repair(this.room.repairNeededStructures(0.05)) === true) {
-      return this.sleep(5)
-    }
-    if (this.repair(this.room.repairNeededBarriers(0.01)) === true) {
-      return this.sleep(5)
-    }
-
-    if (this.tower.energy/this.tower.energyCapacity <= 0.8) {
-      // save for emergencies
-      return this.sleep(5)
-    }
-
-    if (this.repair(this.room.repairNeededStructures(0.75)) === true) {
-      return this.sleep(5)
-    }
-    if (this.repair(this.room.repairNeededBarriers()) === true) {
-      return this.sleep(5)
-    }
-
     this.sleep(5)
   }
 
-  attack(enemies) {
-    let notOnEdge = _.filter(enemies, (e) => !e.pos.onEdge )
+  run(tower) {
+    if (tower.energy == 0) {
+      return
+    }
+
+    if (this.enemies.length > 0 && this.attack(tower) === true) {
+      this.killChild(`repair`)
+      this.killChild(`heal_${tower.id}`)
+      return
+    }
+    delete this.data[tower.id]
+
+    if (this.heal(tower) === true) {
+      this.killChild(`repair`)
+    }
+  }
+
+  attack(tower) {
     // probably a drain attack, ignore for this tick
-    if (notOnEdge.length === 0) {
+    if (this.enemies.length === 0) {
       return true
     }
 
-    let closest = _.min(notOnEdge, (e) => this.tower.pos.getRangeTo(e) )
-    if (this.tower.pos.getRangeTo(closest) <= TOWER_ATTACK_RANGE) {
-      this.killChild(`attack_closest`)
-      this.launchChildProcess('attack_closest', `tower_defend`, {
-        'tower': this.tower.id,
+    let closest = _.min(notOnEdge, (e) => tower.pos.getRangeTo(e) )
+    if (this.data[tower.id] !== closest.id) {
+      this.killChild(`attack_${tower.id}_${this.data[tower.id]}`)
+      this.data[tower.id] = closest.id
+    }
+    if (tower.pos.getRangeTo(closest) <= TOWER_ATTACK_RANGE) {
+      this.launchChildProcess(`attack_${tower.id}_${closest.id}`, `tower_defend`, {
+        'tower': tower.id,
         'enemy': closest.id
       })
-      this.sleep(5)
     }
     return true
   }
 
-  heal() {
-    var creeps = _.filter(this.room.friendlies, (c) => c.hits < c.hitsMax)
-    if (Object.keys(creeps).length == 0 ) {
+  heal(tower) {
+    if (Object.keys(this.hurt).length == 0 ) {
       return false
     }
 
-    var hurt = _.min(creeps, (c) => c.hits/c.hitsMax)
-    if (hurt && hurt.hits < hurt.hitsMax) {
-      this.launchChildProcess('heal', `tower_heal`, {
-        'tower': this.tower.id,
-        'hurt': hurt.id
-      })
-      return true
-    }
-    return false
+    let closest = _.min(this.hurt, (e) => tower.pos.getRangeTo(e) )
+    this.launchChildProcess(`heal_${tower.id}`, `tower_heal`, {
+      'tower': tower.id,
+      'hurt': closest.id
+    })
+    return true
   }
 
-  repair(structures) {
-    var repairable
-
-    // No repairable structures found
-    if (structures.length === 0) {
-      return false
-    }
-
-    var repairable = _.min(structures,
-      (s) => Math.floor(s.hits/s.hitsMax * 15) + Math.random()*0.01)
-    if(repairable) {
-      this.launchChildProcess('repair', `tower_repair`, {
-        'tower': this.tower.id,
-        'repair': repairable.id
-      })
-      return true
-    }
-    return false
+  repair(tower) {
+    this.launchChildProcess(`repair`, `tower_repair`, {
+      'room': this.data.room
+    })
   }
 }
 

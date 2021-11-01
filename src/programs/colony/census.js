@@ -22,7 +22,7 @@ class Census extends kernel.process {
 
     const PopulationManager = require('managers_population')
     let population = new PopulationManager(this.room)
-    Logger.log(`Running census for room ${this.data.room}`)
+    Logger.warn(`Running census for room ${this.data.room}`)
     this.room.memory.nextCreep = population.neededRole()
 
     this.sleep(CENSUS_FREQUENCY)

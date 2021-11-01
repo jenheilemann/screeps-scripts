@@ -15,10 +15,12 @@ class Player extends kernel.process {
     const colonies = Room.getColonies()
     let roomname, room
     for (roomname of colonies) {
-      /** Launch a "Colony" program for each room saved in memory.
+      /**
+       * Launch a "Colony" program for each room saved in memory.
        * `Room.addCity` to add new rooms.
        */
       room = Game.rooms[roomname]
+
       if (room && room.controller && room.controller.my) {
         this.launchChildProcess(`room_${roomname}`, 'colony', {
           'room': roomname

@@ -6,7 +6,7 @@
 
 class Harvester extends kernel.process {
   main () {
-    this.creep = Game.creeps[this.data.creep]
+    this.creep = Game.creeps[this.data.cp]
 
     if (!this.creep) {
       this.suicide()

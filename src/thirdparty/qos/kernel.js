@@ -44,10 +44,10 @@ class QosKernel {
     }
 
     if (this.newglobal) {
-      Logger.info(`New Global Detected`)
+      Logger.warn(`New Global Detected`)
     }
     if (typeof Game.cpu.getHeapStatistics === "function") {
-      Logger.debug(`IVM Uptime: ${Game.time - GLOBAL_LAST_RESET}`)
+      Logger.audit(`IVM Uptime: ${Game.time - GLOBAL_LAST_RESET}`)
     }
 
     sos.lib.segments.moveToGlobalCache()
@@ -89,7 +89,7 @@ class QosKernel {
       try {
         let processName = runningProcess.getProcessName()
 
-        Logger.trace(`Running (${runningProcess.priority}) ${processName} (pid ${runningProcess.pid})`, 'kernel')
+        Logger.debug(`Running (${runningProcess.priority}) ${processName} (pid ${runningProcess.pid})`, 'kernel')
         const startCpu = Game.cpu.getUsed()
         runningProcess.run()
         this.performance.addProgramStats(processName, Game.cpu.getUsed() - startCpu)
@@ -128,7 +128,7 @@ class QosKernel {
 
     // If the bucket rebuild flag is set don't run anything until the bucket has been reset.
     if (Memory.qos.build_bucket) {
-      if (Game.cpu.bucket >= BUCKET_CEILING) {
+      if (Game.cpu.bucket >= BUCKET_FLOOR) {
         delete Memory.qos.build_bucket
       } else {
         return false
@@ -209,11 +209,11 @@ class QosKernel {
     const completedCount = this.scheduler.getCompletedProcessCount()
     const processCount = this.scheduler.getProcessCount()
 
-    Logger.debug(`Processes Run: ${completedCount}/${processCount}`, 'kernel')
-    Logger.debug(`Tick Limit: ${Game.cpu.tickLimit}`, 'kernel')
-    Logger.debug(`Kernel Limit: ${this.getCpuLimit()}`, 'kernel')
+    Logger.audit(`Processes Run: ${completedCount}/${processCount}`, 'kernel')
+    Logger.audit(`Tick Limit: ${Game.cpu.tickLimit}`, 'kernel')
+    Logger.audit(`Kernel Limit: ${this.getCpuLimit()}`, 'kernel')
     Logger.info(`CPU Used: ${Game.cpu.getUsed()}`, 'kernel')
-    Logger.debug(`Bucket: ${Game.cpu.bucket}`, 'kernel')
+    Logger.audit(`Bucket: ${Game.cpu.bucket}`, 'kernel')
     if (typeof Game.cpu.getHeapStatistics === "function") {
       Logger.info(`Heap usage: ${this.getHeapUsage()}`, 'kernel')
     }

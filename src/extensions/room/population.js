@@ -2,7 +2,7 @@
 
 Object.defineProperty(Room.prototype, 'colonyCreeps', {
   get: function () {
-    let cached = sos.lib.cache.get(`${this.name}.colonyCreeps`)
+    let cached = sos.lib.cache.get(`room.${this.name}.colonyCreeps`)
     let creeps = {}
     let refreshCache = false
 
@@ -21,7 +21,7 @@ Object.defineProperty(Room.prototype, 'colonyCreeps', {
       _.each(_.filter(Game.creeps, (c) => c.memory.colony === this.name), function(c) {
         creeps[c.name] = c
       })
-      sos.lib.cache.set(`${this.name}.colonyCreeps`, Object.keys(creeps), {
+      sos.lib.cache.set(`room.${this.name}.colonyCreeps`, Object.keys(creeps), {
         maxttl: 23,
         persist: true
       })
@@ -33,7 +33,7 @@ Object.defineProperty(Room.prototype, 'colonyCreeps', {
 
 Object.defineProperty(Room.prototype, 'friendlies', {
   get: function () {
-    let cached = sos.lib.cache.get(`${this.name}.friendlies`)
+    let cached = sos.lib.cache.get(`room.${this.name}.friendlies`)
     let creeps = {}
     let refreshCache = false
 
@@ -52,7 +52,7 @@ Object.defineProperty(Room.prototype, 'friendlies', {
       _.each(this.find(FIND_MY_CREEPS), function(c) {
         creeps[c.name] = c
       })
-      sos.lib.cache.set(`${this.name}.friendlies`, Object.keys(creeps), {
+      sos.lib.cache.set(`room.${this.name}.friendlies`, Object.keys(creeps), {
         maxttl: 79,
         persist: true
       })

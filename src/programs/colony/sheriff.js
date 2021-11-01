@@ -16,13 +16,7 @@ class Sheriff extends kernel.process {
       return
     }
 
-    const startCpu = Game.cpu.getUsed()
-    let towers = room.towers
-    for (let i in towers) {
-      this.launchChildProcess(towers[i].id, `tower_commander`, {
-        'tower': towers[i].id
-      })
-    }
+    this.launchChildProcess('towers', `tower_commander`, {room: this.data.room})
 
     this.sleep(3)
   }

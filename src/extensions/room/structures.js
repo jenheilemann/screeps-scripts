@@ -3,49 +3,38 @@
 Object.defineProperties(Room.prototype, {
   sources: {
     get: function () {
-      var source_ids = sos.lib.cache.get(`${this.name}.sources`)
-      if (source_ids) {
-        return this.cache.remember('sources', function(ids) {
-          return _.map(ids, (id) => Game.getObjectById(id))
-        }, [source_ids])
-      }
+      return this.cache.remember('sources', function(self) {
+        return _.map(self.survey.sources, (s) => Game.getObjectById(s.id))
+      }, [this])
+    },
+    enumerable: false
+  },
 
-      var sources = this.find(FIND_SOURCES)
-      sos.lib.cache.set(`${this.name}.sources`, _.map(sources, 'id'), {
-        persist: true
-      })
-
-      return sources
+  repairManager: {
+    get: function() {
+      return this.cache.remember('repairManager', function(self) {
+        let RepairManager = require('managers_repair')
+        return new RepairManager(self)
+      }, [this])
     },
     enumerable: false
   },
 
   constructionSites: {
     get: function() {
-      let cached = sos.lib.cache.get(`${this.name}.constructionSites`)
-      let sites = []
-      let refreshCache = false
-
-      if (cached && !_.isEmpty(cached)) {
-        _.each(cached, function(id) {
-          var site = Game.getObjectById(id)
-          if (site) {
-            sites.push(site)
-            return
-          }
-          refreshCache = true
-        })
-      }
-
-      if (_.isEmpty(sites) || refreshCache) {
-        sites = this.find(FIND_MY_CONSTRUCTION_SITES)
-        sos.lib.cache.set(`${this.name}.constructionSites`, _.map(sites, 'id'), {
-          maxttl: 179,
-          persist: true
-        })
-      }
-
-      return sites
+      return this.cache.remember('constructionSites', function(self) {
+        let site_ids = sos.lib.cache.getOrUpdate(`room.${self.name}.constructionSites`,
+            function() {
+              let sites = self.find(FIND_MY_CONSTRUCTION_SITES)
+              return _.map(sites, 'id')
+            }.bind(self),
+            { maxttl: 179, persist: true, refresh: false }
+          )
+        return _(site_ids).
+          map((id) => Game.getObjectById(id)).
+          filter((s) => s !== null).
+          value()
+      }, [this])
     },
     enumerable: false
   },
@@ -62,7 +51,7 @@ Object.defineProperties(Room.prototype, {
   structures: {
     get: function () {
       return this.cache.remember('structures', function(self){
-        return _.filter(self.allStructures, (s) => s.isActive() )
+        return _.filter(self.allStructures, (s) => s.isActive() && (!s.isOwnable() || s.my) )
       }, [this])
     },
     enumerable: false
@@ -72,6 +61,24 @@ Object.defineProperties(Room.prototype, {
     get: function () {
       return this.cache.remember('structuresByType', function(self){
         return _.groupBy(self.structures, 'structureType')
+      }, [this])
+    },
+    enumerable: false
+  },
+
+  hostileStructures: {
+    get: function () {
+      return this.cache.remember('hostileStructures', function(self){
+        return _.filter(self.allStructures, (s) => s.isOwnable() && !s.my )
+      }, [this])
+    },
+    enumerable: false
+  },
+
+  hostileStructuresByType: {
+    get: function () {
+      return this.cache.remember('hostileStructuresByType', function(self){
+        return _.groupBy(self.hostileStructures, 'structureType')
       }, [this])
     },
     enumerable: false
@@ -169,7 +176,6 @@ Room.prototype.repairNeededStructures = function(percent = 0.8) {
     return _.filter(self.structures, (s) => !s.isBarrier() && s.repairNeeded(percent))
   }, [this, percent])
 }
-
 
 Room.prototype.repairNeededBarriers = function(percent = 0.8) {
   if (this.barriers.length == 0) {

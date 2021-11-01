@@ -14,26 +14,22 @@ class Defend extends kernel.process {
   main () {
     this.tower = Game.getObjectById(this.data.tower)
     if (!this.tower) {
-      this.wakeParent()
       return this.suicide()
     }
 
     var enemy = Game.getObjectById(this.data.enemy)
     if (!enemy) {
-      this.wakeParent()
       return this.suicide()
     }
 
     if (enemy.pos.onEdge) {
       // don't drain
       console.log('enemy on edge', enemy.pos)
-      this.wakeParent()
       this.suicide()
       return
     }
 
     if (this.tower.pos.getRangeTo(enemy) > TOWER_FALLOFF_RANGE) {
-      this.wakeParent()
       return this.suicide()
     }
 

@@ -24,14 +24,14 @@ Room.addColony = function (roomName) {
       Game.rooms[mineOwner].removeMine(roomName)
     }
     Memory.territory[roomName] = {}
-    Logger.log(`Adding colony ${roomName}`)
+    Logger.info(`Adding colony ${roomName}`)
   }
 }
 
 Room.removeColony = function (roomName) {
   if (Memory.territory && Memory.territory[roomName]) {
     delete Memory.territory[roomName]
-    Logger.log(`Removing colony ${roomName}`)
+    Logger.info(`Removing colony ${roomName}`)
   }
 }
 
@@ -39,11 +39,17 @@ Object.defineProperties(Room.prototype, {
   safeNeighbors: {
     get: function () {
       return this.cache.remember('safeNeighbors', function(self){
-        let exits = Game.map.describeExits(self.name)
-        let collection = []
-        _.map(exits, (v, k) => collection.push({roomName: v, direction: k}))
-        return collection
+        return self.neighbors
       }, [this])
-    }
+    },
+    enumerable: false
+  },
+  neighbors: {
+    get: function() {
+      return this.cache.remember('neighbors', function(self) {
+        return self.survey.neighbors
+      }, [this])
+    },
+    enumerable: false
   }
 })

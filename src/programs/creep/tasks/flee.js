@@ -52,7 +52,7 @@ class Flee extends BaseTask {
       return
     }
     let goal = this.room.safeNeighbors[0]
-    let pos = new RoomPosition(25, 25, goal.roomName).toHash()
+    let pos = new RoomPosition(25, 25, goal.room).toHash()
     this.launchChildProcess(`run_away`, 'creep_tasks_move', {
       cp:    this.data.cp,
       range: 23,

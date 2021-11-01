@@ -114,6 +114,14 @@ const DISTRIBUTION = {
     max: 6,
     minExtensions: 3,
     priority: function(rm) { return 110 }
+  },
+  scout:  {
+    goal: function(rm) {
+      return 1
+    },
+    max: 2,
+    minExtensions: 6,
+    priority: function(rm) { return 20 }
   }
 }
 

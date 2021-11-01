@@ -25,7 +25,7 @@ class Mayor extends kernel.process {
     for (var cname in creeps) {
       role = Game.creeps[cname].memory.role
       this.launchChildProcess(cname, `creep_${role}`, {
-        'creep': cname
+        'cp': cname
       })
     }
   }

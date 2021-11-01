@@ -6,7 +6,7 @@
 
 class Courier extends kernel.process {
   main () {
-    this.creep = Game.creeps[this.data.creep]
+    this.creep = Game.creeps[this.data.cp]
 
     if (!this.creep) {
       this.suicide()
@@ -119,7 +119,7 @@ class Courier extends kernel.process {
     if (this.refillOpenContainers() !== false ) {
       return true
     }
-    if (this.refillTowers(0.81) !== false ) {
+    if (this.refillTowers(0.91) !== false ) {
       return true
     }
     if (this.refillStorage() !== false ) {
@@ -176,7 +176,7 @@ class Courier extends kernel.process {
 
     var container = _.min(this.room.openContainers, (c) => _.sum(c.store))
 
-    if (!container || container.isFull()) {
+    if (!container || container.isFull() || container.store.energy > 1600) {
       return false
     }
     return this._refill(container)

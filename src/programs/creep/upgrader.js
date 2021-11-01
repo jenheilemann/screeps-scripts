@@ -6,7 +6,7 @@
 
 class Upgrader extends kernel.process {
   main () {
-    this.creep = Game.creeps[this.data.creep]
+    this.creep = Game.creeps[this.data.cp]
 
     if (!this.creep) {
       this.suicide()
@@ -62,7 +62,7 @@ class Upgrader extends kernel.process {
 
   harvest() {
     this.launchChildProcess(`harvest_energy`, 'creep_tasks_harvest', {
-      cp:  this.data.creep,
+      cp:  this.creep.name,
       src: this.source.id,
     })
   }

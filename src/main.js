@@ -12,6 +12,9 @@ const Notify = require('thirdparty_notify')
 global.Logger = new QosLogger(Notify)
 const QosKernel = require('thirdparty_qos_kernel')
 
+const Survey = require('managers_survey')
+global.Surveyor = new Survey()
+
 /* Add "sos library" - https://github.com/ScreepsOS/sos-library */
 global.SOS_LIB_PREFIX = 'thirdparty_'
 require('thirdparty_sos_lib')
@@ -38,10 +41,15 @@ require(`extensions_structure_tower`)
 require(`extensions_structure_storage`)
 global.StructureNull = require(`extensions_structure_null`)
 
+// courtesy of @warinternal Aug 2016 & @semperrabbit Mar 2018
+global.ex   = (x) => JSON.stringify(x, null, 2)
+global.goid = Game.getObjectById
+global.r    = (rName) => Game.rooms[rName]
+
 module.exports.loop = function () {
   if (Game.cpu.bucket < 500) {
     if (Game.cpu.limit !== 0) {
-      Logger.log('Extremely low bucket - aborting script run at start of loop', LOG_FATAL)
+      Logger.fatal('Extremely low bucket - aborting script run at start of loop')
     }
     return
   }

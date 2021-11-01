@@ -15,6 +15,18 @@ Object.defineProperty(Room.prototype, 'cache', {
   }
 })
 
+Object.defineProperty(Room.prototype, 'survey', {
+  get: function () {
+    if (!this._survey) {
+      this._survey = Surveyor.fetch(this)
+      if (this._survey.updated === 0) {
+        this._survey = Surveyor.add(this)
+      }
+    }
+    return this._survey
+  }
+})
+
 Object.defineProperty(Room.prototype, 'defcon', {
   get: function () {
     if (!this._defcon) {

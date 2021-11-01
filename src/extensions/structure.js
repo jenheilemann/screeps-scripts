@@ -12,6 +12,10 @@ Structure.prototype.isNull = function() {
   return false
 }
 
+Structure.prototype.isOwnable = function() {
+  return !UNOWNABLE_STRUCTURE_TYPES.includes(this.structureType)
+}
+
 Structure.prototype.exists = function() { return true }
 Structure.prototype.needsEnergy = function() { return false }
 Structure.prototype.isExtension = function() { return false }

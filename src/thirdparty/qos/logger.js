@@ -1,16 +1,18 @@
 'use strict'
 
-global.LOG_FATAL = 5
-global.LOG_ERROR = 4
-global.LOG_WARN = 3
-global.LOG_INFO = 2
+global.LOG_FATAL = 6
+global.LOG_ERROR = 5
+global.LOG_WARN = 4
+global.LOG_INFO = 3
+global.LOG_AUDIT = 2
 global.LOG_DEBUG = 1
 global.LOG_TRACE = 0
 
 const ERROR_COLORS = {
-  '5': '#ff0066',
-  '4': '#e65c00',
-  '3': '#809fff',
+  '6': '#ff0066',
+  '5': '#e65c00',
+  '4': '#809fff',
+  '3': '#cccccc',
   '2': '#999999',
   '1': '#737373',
   '0': '#666666',
@@ -58,8 +60,9 @@ class Logger {
 
   trace(message, group = false, tags = []) { this.log(message, LOG_TRACE, group, tags) }
   debug(message, group = false, tags = []) { this.log(message, LOG_DEBUG, group, tags) }
-  info (message, group = false, tags = [])  { this.log(message, LOG_INFO, group, tags) }
-  warn (message, group = false, tags = [])  { this.log(message, LOG_WARN, group, tags) }
+  audit(message, group = false, tags = []) { this.log(message, LOG_AUDIT, group, tags) }
+  info (message, group = false, tags = []) { this.log(message, LOG_INFO, group, tags) }
+  warn (message, group = false, tags = []) { this.log(message, LOG_WARN, group, tags) }
   error(message, group = false, tags = []) { this.log(message, LOG_ERROR, group, tags) }
   fatal(message, group = false, tags = []) { this.log(message, LOG_FATAL, group, tags) }
 
